@@ -104,7 +104,7 @@ def build_worker_runner_factory(
             )
             image = os.environ.get(
                 "VERIDIX_DOCKER_IMAGE",
-                "veridix-tools:full",
+                "ghcr.io/kxahc/veridix/veridix-tools:full",
             )
             workspace = Path(os.environ.get("VERIDIX_WORKSPACE_DIR", os.getcwd()))
             runtime_dir = Path(

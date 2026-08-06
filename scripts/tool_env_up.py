@@ -17,7 +17,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "runtime"
-IMAGE = os.environ.get("VERIDIX_TOOL_IMAGE", "veridix-tools:full")
+IMAGE = os.environ.get(
+    "VERIDIX_TOOL_IMAGE",
+    "ghcr.io/kxahc/veridix/veridix-tools:full",
+)
 CODE_IMAGE = os.environ.get("VERIDIX_CODE_IMAGE", "veridix-tools:code-lite")
 ZAP_IMAGE = os.environ.get("VERIDIX_ZAP_IMAGE", "zaproxy/zap-stable:latest")
 ZAP_MIRROR_IMAGE = "docker.1ms.run/zaproxy/zap-stable:latest"

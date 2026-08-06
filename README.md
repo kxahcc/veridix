@@ -35,7 +35,7 @@ veridix up
 
 `veridix up` 会：
 
-1. 拉取并启动 pgvector、Qdrant、Chroma、Neo4j 和 `veridix-tools` 工具环境；
+1. 从 GHCR 拉取并启动 pgvector、Qdrant、Chroma、Neo4j 和 `veridix-tools` 工具环境；
 2. 启动 Control Plane、Agent Worker 和 Web；
 3. 等待全部健康检查通过。
 
@@ -62,6 +62,33 @@ veridix down
 ```
 
 源码运行同样会通过 Docker Compose 管理存储和工具环境，不需要用户手动逐个拉镜像。
+
+## Docker 镜像
+
+工具环境默认使用 GitHub Container Registry：
+
+```text
+ghcr.io/kxahcc/veridix/veridix-tools:full
+ghcr.io/kxahcc/veridix/veridix-tools:code
+ghcr.io/kxahcc/veridix/veridix-tools:code-lite
+ghcr.io/kxahcc/veridix/veridix-tools:dev
+```
+
+仓库在 `v*` 标签或手动触发时，会通过 GitHub Actions 构建并推送这些镜像。
+存储后端继续使用 pgvector、Qdrant、Chroma、Neo4j 官方镜像，由 Compose 自动拉取。
+
+## npm 包
+
+首次 `v*` 发布时，GitHub Actions 会发布：
+
+```text
+@veridix/contracts
+@veridix/config
+@veridix/sdk-typescript
+```
+
+`@veridix/cli` 和 `@veridix/tui` 会在运行时 bundle 方案落地后启用，
+确保用户 `npm install -g @veridix/cli` 后可以完整运行。
 
 ## 三端入口
 

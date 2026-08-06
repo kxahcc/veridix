@@ -51,7 +51,7 @@ services:
       retries: 20
 
   veridix-tools:
-    image: veridix-tools:full
+    image: ${VERIDIX_TOOLS_IMAGE:-ghcr.io/kxahcc/veridix/veridix-tools:full}
     profiles: ["tool-env"]
     build:
       context: ..

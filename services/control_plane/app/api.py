@@ -2473,8 +2473,8 @@ def tool_environment(request: Request) -> dict:
     if not env.get("available"):
         images = _local_docker_images()
         env = {
-            "available": "veridix-tools:full" in images,
-            "image": "veridix-tools:full",
+            "available": "ghcr.io/kxahcc/veridix/veridix-tools:full" in images,
+            "image": "ghcr.io/kxahcc/veridix/veridix-tools:full",
             "digest": "",
             "packs": [],
             "health": "missing",

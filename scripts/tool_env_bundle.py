@@ -18,7 +18,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-IMAGE = "veridix-tools:full"
+IMAGE = "ghcr.io/kxahcc/veridix/veridix-tools:full"
 
 
 def _run(args: list[str], timeout: float = 1800.0) -> subprocess.CompletedProcess:

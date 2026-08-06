@@ -146,6 +146,14 @@ npm config set registry https://registry.npmmirror.com
 
 系统使用 Docker 管理四类资源：存储后端、安全工具镜像、ZAP DAST 和测试靶场。
 
+`veridix up` 默认从 GitHub Container Registry 拉取工具镜像：
+
+```text
+ghcr.io/kxahcc/veridix/veridix-tools:full
+ghcr.io/kxahcc/veridix/veridix-tools:code
+ghcr.io/kxahcc/veridix/veridix-tools:code-lite
+```
+
 统一系统 Compose：
 
 ```bash

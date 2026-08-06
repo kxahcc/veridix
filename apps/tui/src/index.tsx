@@ -712,28 +712,46 @@ function HomeScreen({
   ).length;
   const skills = (assets?.skills as unknown[] | undefined)?.length ?? 0;
   const mcp = (assets?.mcp as unknown[] | undefined)?.length ?? 0;
+  const logo = [
+    "██╗   ██╗███████╗██████╗ ██╗██████╗ ██╗██╗  ██╗",
+    "██║   ██║██╔════╝██╔══██╗██║██╔══██╗██║╚██╗██╔╝",
+    "██║   ██║█████╗  ██████╔╝██║██║  ██║██║ ╚███╔╝",
+    "╚██╗ ██╔╝██╔══╝  ██╔══██╗██║██║  ██║██║ ██╔██╗",
+    " ╚████╔╝ ███████╗██║  ██║██║██████╔╝██║██╔╝ ██╗",
+    "  ╚═══╝  ╚══════╝╚═╝  ╚═╝╚═╝╚═════╝ ╚═╝╚═╝  ╚═╝",
+  ];
 
   return (
-    <Box flexDirection="column" alignItems="center" marginTop={7} width="100%">
-      <Text bold color="cyan">
-        V E R I D I X
-      </Text>
-      <Text dimColor>授权安全测试与漏洞验证 Agent</Text>
-      <Box marginTop={3} flexDirection="column" alignItems="center">
+    <Box flexDirection="column" alignItems="center" marginTop={4} width="100%">
+      {logo.map((line) => (
+        <Text key={line} bold color="cyan">
+          {line}
+        </Text>
+      ))}
+      <Box marginTop={1}>
+        <Text dimColor>授权安全测试与漏洞验证 Agent</Text>
+      </Box>
+      <Box
+        marginTop={3}
+        borderStyle="single"
+        borderColor="cyan"
+        paddingX={2}
+        flexDirection="column"
+      >
         <Text>
-          <Text bold color="cyan">[ Enter ]</Text>  运行列表
+          <Text bold color="cyan">[Enter]</Text>  运行列表
         </Text>
         <Text>
-          <Text bold color="green">[ n ]</Text>     新建任务
+          <Text bold color="green">[n]</Text>     新建任务
         </Text>
         <Text>
-          <Text bold color="yellow">[ / ]</Text>     斜杠命令
+          <Text bold color="yellow">[/]</Text>     斜杠命令
         </Text>
         <Text>
-          <Text bold color="red">[ q ]</Text>     退出
+          <Text bold color="red">[q]</Text>     退出
         </Text>
       </Box>
-      <Box marginTop={3}>
+      <Box marginTop={2}>
         <Text dimColor>
           运行 {activeCount}/{runs.length}  ·  模型 {providers.length}  ·
           组件 {okCount}  ·  工具 {toolHealth ? "可用" : "未就绪"}  ·
