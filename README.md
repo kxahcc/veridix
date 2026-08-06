@@ -69,9 +69,7 @@ veridix down
 
 ```text
 ghcr.io/kxahcc/veridix/veridix-tools:full
-ghcr.io/kxahcc/veridix/veridix-tools:code
 ghcr.io/kxahcc/veridix/veridix-tools:code-lite
-ghcr.io/kxahcc/veridix/veridix-tools:dev
 ```
 
 仓库在 `v*` 标签或手动触发时，会通过 GitHub Actions 构建并推送这些镜像。

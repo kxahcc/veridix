@@ -150,7 +150,6 @@ npm config set registry https://registry.npmmirror.com
 
 ```text
 ghcr.io/kxahcc/veridix/veridix-tools:full
-ghcr.io/kxahcc/veridix/veridix-tools:code
 ghcr.io/kxahcc/veridix/veridix-tools:code-lite
 ```
 

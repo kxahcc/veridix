@@ -27,28 +27,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build dev image
+      - name: Build intermediate dev image
         run: |
           docker build -t ghcr.io/kxahcc/veridix/veridix-tools:dev             -f deploy/container/veridix-tools/Dockerfile .
-          docker push ghcr.io/kxahcc/veridix/veridix-tools:dev
 
       - name: Build full image
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          docker build -t ghcr.io/kxahcc/veridix/veridix-tools:full             -t ghcr.io/kxahcc/veridix/veridix-tools:${VERSION}-full             -f deploy/container/veridix-tools/Dockerfile.full             --build-arg BASE_IMAGE=ghcr.io/kxahcc/veridix/veridix-tools:dev .
+          docker build -t ghcr.io/kxahcc/veridix/veridix-tools:full             -f deploy/container/veridix-tools/Dockerfile.full             --build-arg BASE_IMAGE=ghcr.io/kxahcc/veridix/veridix-tools:dev .
           docker push ghcr.io/kxahcc/veridix/veridix-tools:full
-          docker push ghcr.io/kxahcc/veridix/veridix-tools:${VERSION}-full
-
-      - name: Build code image
-        run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          docker build -t ghcr.io/kxahcc/veridix/veridix-tools:code             -t ghcr.io/kxahcc/veridix/veridix-tools:${VERSION}-code             -f deploy/container/veridix-tools/Dockerfile.code             --build-arg BASE_IMAGE=ghcr.io/kxahcc/veridix/veridix-tools:full .
-          docker push ghcr.io/kxahcc/veridix/veridix-tools:code
-          docker push ghcr.io/kxahcc/veridix/veridix-tools:${VERSION}-code
 
       - name: Build code-lite image
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          docker build -t ghcr.io/kxahcc/veridix/veridix-tools:code-lite             -t ghcr.io/kxahcc/veridix/veridix-tools:${VERSION}-code-lite             -f deploy/container/veridix-tools/Dockerfile.code-lite .
+          docker build -t ghcr.io/kxahcc/veridix/veridix-tools:code-lite             -f deploy/container/veridix-tools/Dockerfile.code-lite .
           docker push ghcr.io/kxahcc/veridix/veridix-tools:code-lite
-          docker push ghcr.io/kxahcc/veridix/veridix-tools:${VERSION}-code-lite
