@@ -205,15 +205,13 @@ flowchart LR
 
 ![Web 任务中心](screenshots/web-run-center.png)
 
-![Web 运行控制台](screenshots/web-run-cockpit.png)
+更多截图：
 
-![证据与发现](screenshots/web-evidence.png)
-
-![攻击图](screenshots/web-attack-graph.png)
-
-![诊断与设置](screenshots/web-settings.png)
-
-![CLI 帮助](screenshots/cli-help.png)
+- [Web 运行控制台](screenshots/web-run-cockpit.png)
+- [证据与发现](screenshots/web-evidence.png)
+- [攻击图](screenshots/web-attack-graph.png)
+- [诊断与设置](screenshots/web-settings.png)
+- [CLI 帮助](screenshots/cli-help.png)
 
 ## 文档
 
