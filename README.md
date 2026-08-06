@@ -73,9 +73,8 @@ ghcr.io/kxahcc/veridix/veridix-tools:code-lite
 
 - GitHub 源码仓库：包含 Web、TUI、CLI、Agent 后端和全部内置知识/技能；
 - GHCR 工具镜像：`veridix-tools:full`、`veridix-tools:code-lite`；
-- npm SDK 包：`@veridix/contracts`、`@veridix/config`、`@veridix/sdk-typescript`，用于外部工程集成。
 
-CLI、TUI、Web 当前随源码仓库交付，不单独发布为 npm CLI 包。源码仓库内使用 npm workspace：
+CLI、TUI、Web 和 SDK 当前都随源码仓库交付，不单独发布为 npm 包。源码仓库内使用 npm workspace：
 
 ```bash
 npm ci
