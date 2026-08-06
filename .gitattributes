@@ -1,0 +1,17 @@
+* text=auto
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.npz binary
+*.npy binary
+*.sqlite3 binary
+*.db binary
+*.exe binary
+*.dll binary
+*.pyc binary
