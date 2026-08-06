@@ -43,21 +43,29 @@ npm run up
 
 启动后，CLI 使用 `npm run cli -- <命令>` 调用，TUI 使用 `npm run tui` 启动。
 
-### 3.2 环境准备
+### 3.2 Python 环境
 
 仓库根目录提供了 [.env.example](../.env.example) 作为环境变量参考。绝大多数配置都有默认值，可以完全不设置环境变量，直接使用 Web `诊断与设置` 或 TUI 斜杠命令配置供应商、MCP、技能和检索存储。
 
-```bash
-npm ci
+后端依赖 Python `3.11+`。首次安装时创建虚拟环境并安装依赖：
+
+Windows PowerShell：
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 python -m pip install -r services/requirements.txt
 ```
 
-Windows 可使用：
+macOS / Linux：
 
-```powershell
-npm ci
-.\.venv\Scripts\python.exe -m pip install -r services/requirements.txt
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r services/requirements.txt
 ```
+
+后续执行 `npm run up` 前先激活该虚拟环境。
 
 ### 3.3 一键启动
 

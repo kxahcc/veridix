@@ -23,6 +23,26 @@ Veridix 是一个面向授权安全测试与漏洞验证的 AI Agent 平台。�
 - Docker Desktop 或 Docker Engine
 - 一个 OpenAI-compatible 或 LiteLLM 兼容的模型端点
 
+### Python 环境
+
+Veridix 后端依赖 Python `3.11+`。首次安装时创建虚拟环境并安装依赖：
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r services/requirements.txt
+```
+
+Windows PowerShell：
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r services/requirements.txt
+```
+
+执行 `npm run up` 前需要先激活该虚拟环境。
+
 ### 安装完整产品
 
 Veridix 通过 GitHub 仓库安装，运行环境由 Docker Compose 自动提供。安装后启动完整产品：
