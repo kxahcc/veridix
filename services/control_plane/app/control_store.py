@@ -343,7 +343,13 @@ class ControlStore:
         rows = self._conn.execute(
             "SELECT * FROM runs ORDER BY created_at DESC"
         ).fetchall()
-        return [self.get_run(row["run_id"]) for row in rows]
+        runs: list[RunState] = []
+        for row in rows:
+            try:
+                runs.append(self.get_run(row["run_id"]))
+            except KeyError:
+                continue
+        return runs
 
     def request_approval(
         self,

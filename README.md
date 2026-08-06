@@ -178,17 +178,20 @@ flowchart LR
 
 ## 界面预览
 
-发布版 README 将在这里补充以下实机截图：
+![Web 任务中心](screenshots/web-run-center.png)
 
-| 截图 | 说明 |
-| --- | --- |
-| `screenshots/web-run-center.png` | Web 任务中心 |
-| `screenshots/web-run-cockpit.png` | Web 运行控制台 |
-| `screenshots/web-evidence.png` | 证据与发现 |
-| `screenshots/web-attack-graph.png` | 攻击图 |
-| `screenshots/web-settings.png` | 诊断与设置 |
-| `screenshots/tui-main.png` | TUI 主界面 |
-| `screenshots/cli-help.png` | CLI 帮助与常用命令输出 |
+![Web 运行控制台](screenshots/web-run-cockpit.png)
+
+![证据与发现](screenshots/web-evidence.png)
+
+![攻击图](screenshots/web-attack-graph.png)
+
+![诊断与设置](screenshots/web-settings.png)
+
+TUI 和 CLI 截图后续补充：
+
+- `screenshots/tui-main.png`：TUI 主界面
+- `screenshots/cli-help.png`：CLI 帮助与常用命令输出
 
 ## 文档
 
