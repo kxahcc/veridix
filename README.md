@@ -67,18 +67,19 @@ ghcr.io/kxahcc/veridix/veridix-tools:code-lite
 
 存储后端使用 pgvector、Qdrant、Chroma、Neo4j 官方镜像，由 Compose 自动拉取。
 
-## npm SDK 包
+## 发布形态
 
-SDK 包供外部工程集成使用：
+当前 v0.1.0 的发布形态如下：
 
-```text
-@veridix/contracts
-@veridix/config
-@veridix/sdk-typescript
-```
+- GitHub 源码仓库：包含 Web、TUI、CLI、Agent 后端和全部内置知识/技能；
+- GHCR 工具镜像：`veridix-tools:full`、`veridix-tools:code-lite`；
+- npm SDK 包：`@veridix/contracts`、`@veridix/config`、`@veridix/sdk-typescript`，用于外部工程集成。
+
+CLI、TUI、Web 当前随源码仓库交付，不单独发布为 npm CLI 包。源码仓库内使用 npm workspace：
 
 ```bash
-npm install @veridix/contracts @veridix/config @veridix/sdk-typescript
+npm ci
+npm run build
 ```
 
 ## 三端入口
