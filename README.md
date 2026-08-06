@@ -2,7 +2,7 @@
 
 Veridix 是一个面向授权安全测试与漏洞验证的 AI Agent 平台。它把侦察、扫描、验证、利用复现、证据归档和报告生成组织成可审计的 Agent 工程流水线，提供 Web、TUI、CLI 三种一致的操作入口。
 
-Veridix 不是聊天玩具，也不是工具拼盘。nmap、nuclei、sqlmap、Metasploit、ZAP 等工具统一进入 ToolBroker、容器沙箱和证据链，由 Agent 按任务意图编排，每一步都有状态、指标、人工门禁和失败原因。
+![Veridix TUI](screenshots/tui-main.png)
 
 ## 功能
 
@@ -188,9 +188,8 @@ flowchart LR
 
 ![诊断与设置](screenshots/web-settings.png)
 
-TUI 和 CLI 截图后续补充：
+TUI 主界面见 README 开头。CLI 截图后续补充：
 
-- `screenshots/tui-main.png`：TUI 主界面
 - `screenshots/cli-help.png`：CLI 帮助与常用命令输出
 
 ## 文档
