@@ -66,38 +66,7 @@ jobs:
             $name = Split-Path $_.Path -Leaf
             "$($_.Hash.ToLower())  $name"
           } | Set-Content "$env:RELEASE_DIR/SHA256SUMS.txt"
-          $py = @'
-import hashlib, json, os, sys
-from pathlib import Path
-sys.path.insert(0, str(Path.cwd()))
-from services.release_service.signing import generate_keypair, sign_bytes, verify_bytes
-out = Path(os.environ["RELEASE_DIR"])
-artifacts = sorted(
-    p.name for p in out.iterdir()
-    if p.is_file() and p.name.endswith((".zip", ".tar.gz", ".exe"))
-)
-entries = {}
-for name in artifacts:
-    data = (out / name).read_bytes()
-    entries[name] = {"sha256": hashlib.sha256(data).hexdigest(), "size": len(data)}
-private_key, public_key = generate_keypair()
-manifest = {
-    "product": "veridix",
-    "version": os.environ.get("RELEASE_VERSION", "").lstrip("v"),
-    "tag": os.environ.get("RELEASE_VERSION", ""),
-    "commit": os.environ.get("GITHUB_SHA", ""),
-    "generated_at": os.environ.get("GITHUB_RUN_ID", ""),
-    "public_key": public_key,
-    "artifacts": entries,
-}
-payload = json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
-signature = sign_bytes(payload, private_key)
-assert verify_bytes(payload, signature, public_key)
-(out / "release-manifest.json").write_bytes(payload)
-(out / "release-manifest.sig").write_text(signature, encoding="ascii")
-(out / "veridix-public-key.txt").write_text(public_key + "\n", encoding="ascii")
-'@
-          $py | python -
+          python scripts/make_release_manifest.py
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
