@@ -683,31 +683,6 @@ function Footer({ detail, filter }: { detail: boolean; filter: string }) {
   );
 }
 
-function HomeStat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: string;
-}) {
-  return (
-    <Box
-      width={29}
-      borderStyle="single"
-      borderColor={tone}
-      flexDirection="column"
-      paddingX={1}
-    >
-      <Text dimColor>{label}</Text>
-      <Text bold color={tone}>
-        {value}
-      </Text>
-    </Box>
-  );
-}
-
 function HomeScreen({
   diagnostics,
   assets,
@@ -739,46 +714,30 @@ function HomeScreen({
   const mcp = (assets?.mcp as unknown[] | undefined)?.length ?? 0;
 
   return (
-    <Box flexDirection="column" width="100%">
-      <Box
-        borderStyle="double"
-        borderColor="cyan"
-        flexDirection="column"
-        alignItems="center"
-        paddingX={2}
-        paddingY={1}
-      >
-        <Text bold color="cyan">
-          VERIDIX
-        </Text>
-        <Text dimColor>授权安全测试与漏洞验证 Agent</Text>
-      </Box>
-      <Box marginTop={1} flexDirection="row">
-        <HomeStat label="运行" value={`${activeCount} 活动 / ${runs.length} 总计`} tone="cyan" />
-        <HomeStat label="模型" value={`${providers.length} 个供应商`} tone="green" />
-        <HomeStat label="组件" value={`${okCount} 项健康`} tone="yellow" />
-        <HomeStat label="工具" value={toolHealth ? "可用" : "未就绪"} tone={toolHealth ? "green" : "red"} />
-      </Box>
-      <Box marginTop={1} borderStyle="single" borderColor="cyan" flexDirection="column" paddingX={1}>
-        <Text bold color="cyan">
-          入口
+    <Box flexDirection="column" alignItems="center" marginTop={7} width="100%">
+      <Text bold color="cyan">
+        V E R I D I X
+      </Text>
+      <Text dimColor>授权安全测试与漏洞验证 Agent</Text>
+      <Box marginTop={3} flexDirection="column" alignItems="center">
+        <Text>
+          <Text bold color="cyan">[ Enter ]</Text>  运行列表
         </Text>
         <Text>
-          <Text bold>Enter</Text> 运行列表
+          <Text bold color="green">[ n ]</Text>     新建任务
         </Text>
         <Text>
-          <Text bold>n</Text> 新建任务
+          <Text bold color="yellow">[ / ]</Text>     斜杠命令
         </Text>
         <Text>
-          <Text bold>/</Text> 斜杠命令：providers / skills / mcp / knowledge / memory / health
-        </Text>
-        <Text>
-          <Text bold>q</Text> 退出
+          <Text bold color="red">[ q ]</Text>     退出
         </Text>
       </Box>
-      <Box marginTop={1}>
+      <Box marginTop={3}>
         <Text dimColor>
-          技能 {skills} 个  ·  MCP {mcp} 个  ·  存储 {storage.available ? "已就绪" : "未上报"}
+          运行 {activeCount}/{runs.length}  ·  模型 {providers.length}  ·
+          组件 {okCount}  ·  工具 {toolHealth ? "可用" : "未就绪"}  ·
+          技能 {skills}  ·  MCP {mcp}  ·  存储 {storage.available ? "已就绪" : "未上报"}
         </Text>
       </Box>
     </Box>
