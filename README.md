@@ -188,9 +188,7 @@ flowchart LR
 
 ![诊断与设置](screenshots/web-settings.png)
 
-TUI 主界面见 README 开头。CLI 截图后续补充：
-
-- `screenshots/cli-help.png`：CLI 帮助与常用命令输出
+![CLI 帮助](screenshots/cli-help.png)
 
 ## 文档
 

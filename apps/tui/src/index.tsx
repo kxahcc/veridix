@@ -683,6 +683,108 @@ function Footer({ detail, filter }: { detail: boolean; filter: string }) {
   );
 }
 
+function HomeStat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: string;
+}) {
+  return (
+    <Box
+      width={29}
+      borderStyle="single"
+      borderColor={tone}
+      flexDirection="column"
+      paddingX={1}
+    >
+      <Text dimColor>{label}</Text>
+      <Text bold color={tone}>
+        {value}
+      </Text>
+    </Box>
+  );
+}
+
+function HomeScreen({
+  diagnostics,
+  assets,
+  runs,
+}: {
+  diagnostics: Record<string, unknown> | null;
+  assets: Record<string, unknown> | null;
+  runs: RunState[];
+}) {
+  const providers =
+    (diagnostics?.providers as Array<Record<string, unknown>> | undefined) ?? [];
+  const components =
+    (diagnostics?.components as
+      | Record<string, Record<string, unknown>>
+      | undefined) ?? {};
+  const storage = (diagnostics?.storage as Record<string, unknown> | undefined) ?? {};
+  const toolHealth =
+    String(
+      (diagnostics?.tool_environment as Record<string, unknown> | undefined)
+        ?.health ?? "missing",
+    ) === "ok";
+  const activeCount = runs.filter((run) =>
+    ["requested", "running", "claimed", "paused"].includes(run.status),
+  ).length;
+  const okCount = Object.values(components).filter(
+    (component) => component.status === "ok",
+  ).length;
+  const skills = (assets?.skills as unknown[] | undefined)?.length ?? 0;
+  const mcp = (assets?.mcp as unknown[] | undefined)?.length ?? 0;
+
+  return (
+    <Box flexDirection="column" width="100%">
+      <Box
+        borderStyle="double"
+        borderColor="cyan"
+        flexDirection="column"
+        alignItems="center"
+        paddingX={2}
+        paddingY={1}
+      >
+        <Text bold color="cyan">
+          VERIDIX
+        </Text>
+        <Text dimColor>授权安全测试与漏洞验证 Agent</Text>
+      </Box>
+      <Box marginTop={1} flexDirection="row">
+        <HomeStat label="运行" value={`${activeCount} 活动 / ${runs.length} 总计`} tone="cyan" />
+        <HomeStat label="模型" value={`${providers.length} 个供应商`} tone="green" />
+        <HomeStat label="组件" value={`${okCount} 项健康`} tone="yellow" />
+        <HomeStat label="工具" value={toolHealth ? "可用" : "未就绪"} tone={toolHealth ? "green" : "red"} />
+      </Box>
+      <Box marginTop={1} borderStyle="single" borderColor="cyan" flexDirection="column" paddingX={1}>
+        <Text bold color="cyan">
+          入口
+        </Text>
+        <Text>
+          <Text bold>Enter</Text> 运行列表
+        </Text>
+        <Text>
+          <Text bold>n</Text> 新建任务
+        </Text>
+        <Text>
+          <Text bold>/</Text> 斜杠命令：providers / skills / mcp / knowledge / memory / health
+        </Text>
+        <Text>
+          <Text bold>q</Text> 退出
+        </Text>
+      </Box>
+      <Box marginTop={1}>
+        <Text dimColor>
+          技能 {skills} 个  ·  MCP {mcp} 个  ·  存储 {storage.available ? "已就绪" : "未上报"}
+        </Text>
+      </Box>
+    </Box>
+  );
+}
+
 function ResourceView({
   view,
   diagnostics,
@@ -1174,6 +1276,7 @@ export function App() {
   const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
   const [exportedPath, setExportedPath] = useState<string | null>(null);
   const [view, setView] = useState<View>("events");
+  const [home, setHome] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [diagnostics, setDiagnostics] = useState<Record<string, unknown> | null>(
     null,
@@ -2085,6 +2188,21 @@ export function App() {
   };
 
   useInput((input, key) => {
+    if (home) {
+      if (input === "q" && !key.ctrl) {
+        exit();
+        return;
+      }
+      if (input === "/") {
+        setHome(false);
+        setCommandMode(true);
+        setCommandDraft("/");
+        setHistoryIndex(-1);
+        return;
+      }
+      setHome(false);
+      return;
+    }
     if (help) {
       if (input === "q" || input === "?") {
         setHelp(false);
@@ -2360,6 +2478,18 @@ export function App() {
   const activeCount = runs.filter((run) =>
     ["requested", "running", "claimed", "paused"].includes(run.status),
   ).length;
+
+  if (home) {
+    return (
+      <Box flexDirection="column" padding={1} width="100%">
+        <HomeScreen
+          diagnostics={diagnostics}
+          assets={assets}
+          runs={runs}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box flexDirection="column" padding={1} width="100%">

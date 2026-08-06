@@ -246,6 +246,8 @@ describe("TUI long interaction session", () => {
     const instance = render(<App />);
     instances.push(instance);
     await sleep(350);
+    instance.stdin.write("\r");
+    await sleep(100);
 
     let frame = instance.lastFrame() ?? "";
     expect(frame, JSON.stringify(frame)).toContain("run_long_1");

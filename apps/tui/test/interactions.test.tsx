@@ -23,6 +23,8 @@ describe("TUI interactions", () => {
     const instance = render(<App />);
     instances.push(instance);
     await sleep(180);
+    instance.stdin.write("\r");
+    await sleep(100);
 
     const frame = instance.lastFrame() ?? "";
     expect(frame).toContain("VERIDIX AGENT");
