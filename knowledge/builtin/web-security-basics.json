@@ -1,0 +1,28 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "kbase.web.default-credentials",
+      "source_ref": "builtin:web-security-basics",
+      "content": "Default or weak credentials on administrative interfaces are a common web vulnerability class. Coverage should include login pages, admin panels, API keys, and password reset flows.",
+      "trust": "project_trusted",
+      "version": "1",
+      "subjects": ["web", "auth", "web_discovery"]
+    },
+    {
+      "chunk_id": "kbase.web.authz-matrix",
+      "source_ref": "builtin:web-security-basics",
+      "content": "Authorization testing compares the responses of anonymous, authenticated low-privilege, and high-privilege roles across the same endpoints and HTTP methods.",
+      "trust": "project_trusted",
+      "version": "1",
+      "subjects": ["web", "auth", "verifier"]
+    },
+    {
+      "chunk_id": "kbase.host.service-enumeration",
+      "source_ref": "builtin:web-security-basics",
+      "content": "Host service enumeration records open ports, service versions, and known vulnerability families before deciding which active checks are authorized for the target.",
+      "trust": "project_trusted",
+      "version": "1",
+      "subjects": ["host", "network", "host"]
+    }
+  ]
+}

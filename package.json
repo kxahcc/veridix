@@ -1,0 +1,29 @@
+{
+  "name": "veridix",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Veridix - independent product repository",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "up": "python scripts/env_up.py",
+    "down": "python scripts/dev_stack.py --stop",
+    "build": "npm run build -w @veridix/contracts && npm run build -w @veridix/config && npm run build -w @veridix/sdk-typescript && npm run build -w @veridix/cli && npm run build -w @veridix/web && npm run build -w @veridix/tui",
+    "test": "npm run build && npm run test -w @veridix/cli && npm run test -w @veridix/config && npm run test -w @veridix/contracts && npm run test -w @veridix/sdk-typescript && npm run test -w @veridix/web && npm run test -w @veridix/tui",
+    "typecheck": "tsc -b"
+  },
+  "engines": {
+    "node": ">=22 <25"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "mcp-fetch-server": "^1.1.2"
+  }
+}

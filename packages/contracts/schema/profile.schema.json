@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://veridix.local/schemas/profile.schema.json",
+  "title": "RuntimeProfile",
+  "type": "object",
+  "required": ["name", "label", "dependencies"],
+  "properties": {
+    "name": { "enum": ["desktop", "lab", "server", "airgap"] },
+    "label": { "type": "string" },
+    "dependencies": {
+      "type": "array",
+      "items": { "enum": ["node", "python", "docker", "browser", "mitmproxy", "postgres", "object-store"] }
+    }
+  },
+  "additionalProperties": true
+}

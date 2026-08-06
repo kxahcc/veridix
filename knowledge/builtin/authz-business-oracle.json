@@ -1,0 +1,61 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "authz.baseline",
+      "source_ref": "builtin/authz/baseline",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test"],
+      "content": "Authz 基线：为每个角色建立独立 auth context（cookie/token 的 SecretRef），先记录高权限与低权限的 baseline 响应集合；对象 ID 从列表/搜索/导出/通知等枚举源收集。任何对象引用都先假设不受信任，直到业务 Oracle 证明其绑定到调用者。",
+      "graph": {
+        "nodes": [
+          {"id": "authz.baseline", "type": "playbook", "label": "Authz Baseline"},
+          {"id": "concept.auth-context", "type": "concept", "label": "auth context"},
+          {"id": "concept.object-ref", "type": "concept", "label": "object reference"}
+        ],
+        "edges": [
+          {"source": "authz.baseline", "target": "concept.auth-context", "predicate": "builds"},
+          {"source": "authz.baseline", "target": "concept.object-ref", "predicate": "treats_untrusted"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "authz.matrix-procedure",
+      "source_ref": "builtin/authz/matrix-procedure",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test", "verifier"],
+      "content": "Authz 矩阵流程：endpoint x 角色 x 方法生成 mutation 集，覆盖水平越权（对象 ID 互换）、垂直越权（低权限访问高权限动作）、批量端点首元素校验绕过、部分更新（PATCH/JSON Merge Patch）静默越权。每格记录 baseline 与 mutation 响应 diff，标记 expected_denied/actual_allowed。",
+      "graph": {
+        "nodes": [
+          {"id": "authz.matrix-procedure", "type": "playbook", "label": "Authz Matrix Procedure"},
+          {"id": "concept.role-matrix", "type": "concept", "label": "role x endpoint matrix"},
+          {"id": "concept.mutation", "type": "concept", "label": "mutation presets"}
+        ],
+        "edges": [
+          {"source": "authz.matrix-procedure", "target": "concept.role-matrix", "predicate": "expands"},
+          {"source": "authz.matrix-procedure", "target": "concept.mutation", "predicate": "uses"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "authz.oracle-rules",
+      "source_ref": "builtin/authz/oracle-rules",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["verifier"],
+      "content": "Authz Oracle 规则：verified 需要 1) 低权限请求获得对象级/动作级资源，2) 响应内容可证明数据归属或业务动作，3) 有 ReplayProof。仅状态码差异不足以 verified；如果响应被统一重定向或脱敏，标记 inconclusive 并补充业务证据。negative evidence 记录 denied/redirect 集合，避免重复测试。",
+      "graph": {
+        "nodes": [
+          {"id": "authz.oracle-rules", "type": "oracle", "label": "Authz Oracle Rules"},
+          {"id": "concept.replay-proof", "type": "concept", "label": "ReplayProof"},
+          {"id": "concept.negative-evidence", "type": "concept", "label": "negative evidence"}
+        ],
+        "edges": [
+          {"source": "authz.oracle-rules", "target": "concept.replay-proof", "predicate": "requires"},
+          {"source": "authz.oracle-rules", "target": "concept.negative-evidence", "predicate": "consumes"}
+        ]
+      }
+    }
+  ]
+}

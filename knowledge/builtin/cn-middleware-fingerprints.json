@@ -1,0 +1,91 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "cn.middleware.apache",
+      "source_ref": "builtin/cn/middleware-apache",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_test", "host"],
+      "content": "Apache 指纹：Server 头、.htaccess、目录列表。常见问题：未授权目录、SSI 注入、mod_proxy 开放代理、Log4j（JNDI）相关组件漏洞。工具：whatweb/nikto/nuclei。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.middleware.apache", "type": "glossary", "label": "Apache"},
+          {"id": "tech.whatweb", "type": "tool", "label": "whatweb"},
+          {"id": "tech.nuclei", "type": "tool", "label": "nuclei"}
+        ],
+        "edges": [
+          {"source": "cn.middleware.apache", "target": "tech.whatweb", "predicate": "mentions"},
+          {"source": "cn.middleware.apache", "target": "tech.nuclei", "predicate": "mentions"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "cn.middleware.nginx",
+      "source_ref": "builtin/cn/middleware-nginx",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_test", "host"],
+      "content": "Nginx 指纹：Server: nginx、X-Powered-By、默认错误页。常见问题：路径解析/别名遍历、配置错误暴露源码、SSRF 经反向代理。工具：whatweb/ffuf/curl。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.middleware.nginx", "type": "glossary", "label": "Nginx"},
+          {"id": "tech.ffuf", "type": "tool", "label": "ffuf"}
+        ],
+        "edges": [
+          {"source": "cn.middleware.nginx", "target": "tech.ffuf", "predicate": "mentions"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "cn.middleware.tomcat",
+      "source_ref": "builtin/cn/middleware-tomcat",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_test", "host"],
+      "content": "Tomcat 指纹：默认 8080、manager/html 管理页、Coyote 头。常见问题：弱口令 manager、PUT 上传、反序列化（CVE-2017-12615/12617）、AJP Ghostcat。工具：nuclei/sqlmap/burp。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.middleware.tomcat", "type": "glossary", "label": "Tomcat"},
+          {"id": "tech.nuclei", "type": "tool", "label": "nuclei"}
+        ],
+        "edges": [
+          {"source": "cn.middleware.tomcat", "target": "tech.nuclei", "predicate": "mentions"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "cn.middleware.weblogic",
+      "source_ref": "builtin/cn/middleware-weblogic",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_test", "host"],
+      "content": "WebLogic 指纹：7001 默认端口、console 登录页、T3/IIOP。常见问题：反序列化（CVE-2015-4852、CVE-2019-2725、CVE-2020-14882/14883）、SSRF 到 LDAP。工具：nuclei/metasploit。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.middleware.weblogic", "type": "glossary", "label": "WebLogic"},
+          {"id": "tech.metasploit", "type": "tool", "label": "metasploit"}
+        ],
+        "edges": [
+          {"source": "cn.middleware.weblogic", "target": "tech.metasploit", "predicate": "mentions"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "cn.middleware.iis",
+      "source_ref": "builtin/cn/middleware-iis",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_test", "host"],
+      "content": "IIS 指纹：Server: Microsoft-IIS、ASP.NET 版本头。常见问题：短文件名枚举、WebDAV 上传、路径解析（CVE-2015-1635）、aspx 反序列化。工具：nuclei/gobuster/dirsearch。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.middleware.iis", "type": "glossary", "label": "IIS"},
+          {"id": "tech.gobuster", "type": "tool", "label": "gobuster"}
+        ],
+        "edges": [
+          {"source": "cn.middleware.iis", "target": "tech.gobuster", "predicate": "mentions"}
+        ]
+      }
+    }
+  ]
+}

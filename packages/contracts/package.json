@@ -1,0 +1,13 @@
+{
+  "name": "@veridix/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "generate": "python scripts/generate_types.py",
+    "build": "npm run generate && tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  }
+}

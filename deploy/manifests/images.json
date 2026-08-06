@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-08-04T13:02:00Z",
+  "images": {
+    "veridix-tools-dev": {
+      "digest": "sha256:e195b6cb359d9381b9af1cf34d7b0a98e865c9450fa60136a4fdb77d688b45fe",
+      "size": 322200331,
+      "os": "linux",
+      "architecture": "amd64",
+      "labels": {}
+    },
+    "veridix-tools-full": {
+      "digest": "sha256:bf67b075a85eb095689c5bacfe0bbd3d5819e0075abd243685c782fc4c4263ec",
+      "size": 1302800434,
+      "os": "linux",
+      "architecture": "amd64",
+      "labels": {}
+    },
+    "veridix-tools-code-lite": {
+      "digest": "sha256:ea651e62ce0bd2eb91378f5f87b0f61c835cb62ac47a37578891858fa6c2bb04",
+      "size": 176647953,
+      "os": "linux",
+      "architecture": "amd64",
+      "labels": {}
+    },
+    "zap-stable": {
+      "digest": "sha256:8d387b1a63e3425beef4846e39719f5af2a787753af2d8b6558c6257d7a577a2",
+      "size": 1190637884,
+      "os": "linux",
+      "architecture": "amd64",
+      "labels": {}
+    }
+  }
+}

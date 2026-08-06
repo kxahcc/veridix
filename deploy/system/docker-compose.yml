@@ -1,0 +1,96 @@
+name: veridix-system
+
+services:
+  pgvector:
+    image: ${VERIDIX_STORAGE_REGISTRY:-docker.m.daocloud.io/}pgvector/pgvector:pg16
+    command: ["postgres", "-p", "${VERIDIX_PGVECTOR_INTERNAL_PORT:-5432}"]
+    environment:
+      POSTGRES_USER: veridix
+      POSTGRES_PASSWORD: veridix
+      POSTGRES_DB: veridix
+      PGPORT: ${VERIDIX_PGVECTOR_INTERNAL_PORT:-5432}
+    ports:
+      - "${VERIDIX_PGVECTOR_PORT:-55432}:${VERIDIX_PGVECTOR_INTERNAL_PORT:-5432}"
+    networks:
+      - veridix-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U veridix -d veridix -p ${VERIDIX_PGVECTOR_INTERNAL_PORT:-5432}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  qdrant:
+    image: ${VERIDIX_STORAGE_REGISTRY:-docker.m.daocloud.io/}qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    networks:
+      - veridix-net
+
+  chroma:
+    image: ${VERIDIX_STORAGE_REGISTRY:-docker.m.daocloud.io/}chromadb/chroma:latest
+    ports:
+      - "8001:8000"
+    networks:
+      - veridix-net
+
+  neo4j:
+    image: ${VERIDIX_STORAGE_REGISTRY:-docker.m.daocloud.io/}neo4j:5
+    environment:
+      NEO4J_AUTH: neo4j/veridixpass
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1G
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    networks:
+      - veridix-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  veridix-tools:
+    image: veridix-tools:full
+    profiles: ["tool-env"]
+    build:
+      context: ..
+      dockerfile: container/veridix-tools/Dockerfile.full
+      args:
+        BASE_IMAGE: veridix-tools:dev
+    command: ["sh", "-c", "echo veridix-tools ready; sleep infinity"]
+    networks:
+      - veridix-net
+    healthcheck:
+      test: ["CMD-SHELL", "command -v nmap && command -v nuclei && command -v masscan && command -v sqlmap && command -v subfinder && command -v httpx && command -v naabu && command -v msfconsole && command -v wpscan"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  zap:
+    image: ${VERIDIX_ZAP_IMAGE:-zaproxy/zap-stable:latest}
+    profiles: ["tool-env"]
+    command:
+      - /bin/bash
+      - -lc
+      - >-
+        /zap/zap.sh -daemon -host 0.0.0.0 -port 8090
+        -config api.disablekey=false
+        -config api.key=${VERIDIX_ZAP_API_KEY:-veridix-zap}
+        -config api.addrs.addr.name=.*
+        -config api.addrs.addr.regex=true
+    ports:
+      - "127.0.0.1:8090:8090"
+    networks:
+      - veridix-net
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8090'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+networks:
+  veridix-net:
+    driver: bridge

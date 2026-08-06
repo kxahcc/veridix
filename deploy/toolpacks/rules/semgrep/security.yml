@@ -1,0 +1,182 @@
+rules:
+  - id: python.lang.security.audit.eval-use
+    languages:
+      - python
+    severity: WARNING
+    message: Potential eval/exec of untrusted input.
+    metadata:
+      category: security
+      cwe:
+        - CWE-95
+      owasp:
+        - A03:2021-Injection
+    pattern-either:
+      - pattern: eval($CODE)
+      - pattern: exec($CODE)
+
+  - id: python.lang.security.audit.os-system
+    languages:
+      - python
+    severity: WARNING
+    message: Potential OS command execution via os.system.
+    metadata:
+      category: security
+      cwe:
+        - CWE-78
+      owasp:
+        - A03:2021-Injection
+    pattern: os.system($CMD)
+
+  - id: python.lang.security.audit.subprocess-shell
+    languages:
+      - python
+    severity: WARNING
+    message: subprocess invoked with shell=True can execute untrusted commands.
+    metadata:
+      category: security
+      cwe:
+        - CWE-78
+      owasp:
+        - A03:2021-Injection
+    pattern-either:
+      - pattern: subprocess.run($CMD, shell=True)
+      - pattern: subprocess.call($CMD, shell=True)
+      - pattern: subprocess.Popen($CMD, shell=True)
+
+  - id: python.lang.security.audit.sql-string-execution
+    languages:
+      - python
+    severity: WARNING
+    message: SQL query built from dynamic values may allow injection.
+    metadata:
+      category: security
+      cwe:
+        - CWE-89
+      owasp:
+        - A03:2021-Injection
+    pattern-either:
+      - pattern: cursor.execute($QUERY)
+      - pattern: connection.execute($QUERY)
+      - pattern: conn.execute($QUERY)
+      - pattern: sqlite3.connect($DB).execute($QUERY)
+
+  - id: python.lang.security.audit.pickle-loads
+    languages:
+      - python
+    severity: WARNING
+    message: Unpickling untrusted data can lead to remote code execution.
+    metadata:
+      category: security
+      cwe:
+        - CWE-502
+      owasp:
+        - A08:2021-Software and Data Integrity Failures
+    pattern-either:
+      - pattern: pickle.loads($DATA)
+      - pattern: pickle.load($STREAM)
+
+  - id: python.lang.security.audit.request-url-variable
+    languages:
+      - python
+    severity: WARNING
+    message: HTTP request URL comes from a variable; validate it to avoid SSRF.
+    metadata:
+      category: security
+      cwe:
+        - CWE-918
+      owasp:
+        - A10:2021-Server-Side Request Forgery
+    pattern-either:
+      - pattern: requests.get($URL)
+      - pattern: requests.post($URL)
+      - pattern: requests.request($METHOD, $URL)
+
+  - id: javascript.lang.security.audit.inner-html
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
+    message: Assigning untrusted HTML can lead to DOM XSS.
+    metadata:
+      category: security
+      cwe:
+        - CWE-79
+      owasp:
+        - A03:2021-Injection
+    pattern: $ELEMENT.innerHTML = $HTML
+
+  - id: javascript.lang.security.audit.eval
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
+    message: eval of untrusted input can lead to code injection.
+    metadata:
+      category: security
+      cwe:
+        - CWE-95
+      owasp:
+        - A03:2021-Injection
+    pattern-either:
+      - pattern: eval($CODE)
+      - pattern: Function($CODE)
+
+  - id: javascript.lang.security.audit.child-process-exec
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
+    message: Shell execution with untrusted arguments can lead to command injection.
+    metadata:
+      category: security
+      cwe:
+        - CWE-78
+      owasp:
+        - A03:2021-Injection
+    pattern-either:
+      - pattern: exec($CMD)
+      - pattern: execSync($CMD)
+
+  - id: java.lang.security.audit.runtime-exec
+    languages:
+      - java
+    severity: WARNING
+    message: Runtime.exec with untrusted input can lead to command injection.
+    metadata:
+      category: security
+      cwe:
+        - CWE-78
+      owasp:
+        - A03:2021-Injection
+    pattern-either:
+      - pattern: Runtime.getRuntime().exec($CMD)
+      - pattern: ProcessBuilder($CMD)
+
+  - id: java.lang.security.audit.sql-concat
+    languages:
+      - java
+    severity: WARNING
+    message: SQL built with string concatenation may allow injection.
+    metadata:
+      category: security
+      cwe:
+        - CWE-89
+      owasp:
+        - A03:2021-Injection
+    pattern-either:
+      - pattern: Statement.executeQuery($QUERY)
+      - pattern: Statement.execute($QUERY)
+      - pattern: PreparedStatement.executeQuery($QUERY)
+
+  - id: java.lang.security.audit.object-input-stream
+    languages:
+      - java
+    severity: WARNING
+    message: Deserializing untrusted data can lead to remote code execution.
+    metadata:
+      category: security
+      cwe:
+        - CWE-502
+      owasp:
+        - A08:2021-Software and Data Integrity Failures
+    pattern: new ObjectInputStream($INPUT).readObject()

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://veridix.local/schemas/command.schema.json",
+  "title": "CommandEnvelope",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "commandId",
+    "commandType",
+    "runId",
+    "idempotencyKey",
+    "requestedAt",
+    "payload"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "commandId": { "type": "string", "minLength": 1 },
+    "commandType": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]+$"
+    },
+    "runId": { "type": "string", "minLength": 1 },
+    "idempotencyKey": { "type": "string", "minLength": 1 },
+    "requestedAt": { "type": "string", "format": "date-time" },
+    "payload": { "type": "object" }
+  },
+  "additionalProperties": false
+}

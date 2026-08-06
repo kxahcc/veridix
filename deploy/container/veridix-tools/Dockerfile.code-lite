@@ -1,0 +1,25 @@
+ARG BASE_IMAGE=debian:bookworm-slim
+FROM ${BASE_IMAGE}
+
+ARG PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates \
+        git \
+        python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install --break-system-packages --no-cache-dir \
+        -i "$PIP_INDEX_URL" \
+        detect-secrets
+RUN python3 -m pip install --break-system-packages --no-cache-dir \
+        -i "$PIP_INDEX_URL" \
+        semgrep
+
+ENV HOME=/tmp \
+    SEMGREP_ENABLE_VERSION_CHECK=0 \
+    SEMGREP_SEND_METRICS=off
+COPY deploy/toolpacks/rules/semgrep /opt/veridix-rules/semgrep
+
+CMD ["sh", "-c", "echo veridix-tools-code-lite ready; command -v semgrep; command -v detect-secrets"]

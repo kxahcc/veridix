@@ -1,0 +1,6 @@
+{
+  "model": "nomic-embed-text",
+  "endpoint": "http://127.0.0.1:11434/v1",
+  "dimensions": 768,
+  "chunks": 295
+}

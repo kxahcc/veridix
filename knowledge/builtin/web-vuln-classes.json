@@ -1,0 +1,188 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "vuln.sqli",
+      "source_ref": "builtin/vuln-classes/sqli",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test", "verifier"],
+      "content": "SQL 注入测试：先枚举参数与输入点，用单引号/双引号/反斜杠观察响应差异，再用 sqlmap 对候选 endpoint 做检测。证据要求：baseline 请求、突变请求、响应 diff、数据库报错或时间差异，以及 sqlmap 的 structured output（vuln_category=SQLi）。工具映射：web.sqlmap.scan、proxy.replay、web.replay。盲注优先用时间盲注与布尔盲注，避免破坏性 payload。",
+      "graph": {
+        "nodes": [
+          {"id": "vuln.sqli", "type": "vuln_class", "label": "SQL Injection"},
+          {"id": "cwe-89", "type": "cwe", "label": "CWE-89 SQL Injection", "properties": {"cwe": "89"}},
+          {"id": "tech.sqlmap", "type": "tool", "label": "sqlmap"},
+          {"id": "tactic.initial-access", "type": "attck", "label": "TA0001 Initial Access"}
+        ],
+        "edges": [
+          {"source": "vuln.sqli", "target": "cwe-89", "predicate": "maps_to"},
+          {"source": "vuln.sqli", "target": "tech.sqlmap", "predicate": "tested_with"},
+          {"source": "vuln.sqli", "target": "tactic.initial-access", "predicate": "enables"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "vuln.xss",
+      "source_ref": "builtin/vuln-classes/xss",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test", "verifier"],
+      "content": "XSS 测试：对反射型参数做编码绕过（HTML/URL/JS 上下文），对存储型输入做持久化写入后访问验证。证据要求：反射/存储位置、执行上下文、payload 的浏览器观察或 DOM snapshot。工具映射：browser.open、proxy.list、web.replay、zap.scan/burp.scan/caido.scan。不要把 XSS 当低危草率处理，检查 CSP、httponly、同源策略与业务影响。",
+      "graph": {
+        "nodes": [
+          {"id": "vuln.xss", "type": "vuln_class", "label": "Cross-Site Scripting"},
+          {"id": "cwe-79", "type": "cwe", "label": "CWE-79 XSS", "properties": {"cwe": "79"}},
+          {"id": "tech.browser", "type": "tool", "label": "Playwright browser"}
+        ],
+        "edges": [
+          {"source": "vuln.xss", "target": "cwe-79", "predicate": "maps_to"},
+          {"source": "vuln.xss", "target": "tech.browser", "predicate": "verified_with"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "vuln.ssrf",
+      "source_ref": "builtin/vuln-classes/ssrf",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test", "verifier"],
+      "content": "SSRF 测试：找 URL/文件/图片/webhook 类参数，替换为内部地址与回调地址，用一次性 OAST token 观察回调。证据要求：回调时间、来源 IP、响应差异、请求指纹。工具映射：oaast.callback、proxy.replay、web.replay。若目标可访问 metadata 地址（169.254.169.254）必须确认回源与授权边界，禁止自动读取 secret 进上下文。",
+      "graph": {
+        "nodes": [
+          {"id": "vuln.ssrf", "type": "vuln_class", "label": "Server-Side Request Forgery"},
+          {"id": "cwe-918", "type": "cwe", "label": "CWE-918 SSRF", "properties": {"cwe": "918"}},
+          {"id": "tech.oast", "type": "tool", "label": "OAST callback"}
+        ],
+        "edges": [
+          {"source": "vuln.ssrf", "target": "cwe-918", "predicate": "maps_to"},
+          {"source": "vuln.ssrf", "target": "tech.oast", "predicate": "verified_with"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "vuln.idor",
+      "source_ref": "builtin/vuln-classes/idor",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test", "verifier"],
+      "content": "IDOR/BOLA 测试：先建两个用户上下文（低权限 A/B），用 A 的 token 访问 B 的对象 ID，覆盖路径/查询/JSON body/header 中的 id、uuid、slug、复合键。证据要求：两个 auth context、对象 ID、响应内容 diff、是否返回 200 与对象数据。禁止只凭状态码判断，需业务 Oracle 确认对象归属。",
+      "graph": {
+        "nodes": [
+          {"id": "vuln.idor", "type": "vuln_class", "label": "IDOR / BOLA"},
+          {"id": "cwe-639", "type": "cwe", "label": "CWE-639 Authorization Bypass", "properties": {"cwe": "639"}},
+          {"id": "concept.auth-context", "type": "concept", "label": "auth context matrix"}
+        ],
+        "edges": [
+          {"source": "vuln.idor", "target": "cwe-639", "predicate": "maps_to"},
+          {"source": "vuln.idor", "target": "concept.auth-context", "predicate": "requires"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "vuln.authz-matrix",
+      "source_ref": "builtin/vuln-classes/authz-matrix",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test", "verifier"],
+      "content": "AuthZ 矩阵测试：对 endpoint 集合 x 角色集合生成 baseline/mutation 矩阵，逐格验证角色边界、对象归属、HTTP 方法语义（GET/POST/PATCH/DELETE）与业务动作。证据要求：角色矩阵、每个格子的响应 diff、业务状态变化、越权对象引用。Oracle 规则：仅当低权限请求获得高权限资源或对象级越权成立时才 verified；响应一致无差异记 negative evidence。",
+      "graph": {
+        "nodes": [
+          {"id": "vuln.authz-matrix", "type": "vuln_class", "label": "Authorization Matrix"},
+          {"id": "concept.role-matrix", "type": "concept", "label": "role x endpoint matrix"},
+          {"id": "cwe-862", "type": "cwe", "label": "CWE-862 Missing Authorization", "properties": {"cwe": "862"}}
+        ],
+        "edges": [
+          {"source": "vuln.authz-matrix", "target": "concept.role-matrix", "predicate": "executed_as"},
+          {"source": "vuln.authz-matrix", "target": "cwe-862", "predicate": "maps_to"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "vuln.upload",
+      "source_ref": "builtin/vuln-classes/upload",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test"],
+      "content": "文件上传测试：覆盖扩展名/内容类型/魔数/路径穿越/压缩炸弹/图片重编码。证据要求：上传请求、服务端返回、文件访问 URL、内容执行或解析结果。执行类 payload 只允许在授权靶场验证，并走沙箱；正式测试优先证明存储型 XSS/任意文件写，而不是直接 RCE。",
+      "graph": {
+        "nodes": [
+          {"id": "vuln.upload", "type": "vuln_class", "label": "File Upload"},
+          {"id": "cwe-434", "type": "cwe", "label": "CWE-434 Unrestricted Upload", "properties": {"cwe": "434"}},
+          {"id": "tech.sandbox", "type": "concept", "label": "S2 sandbox"}
+        ],
+        "edges": [
+          {"source": "vuln.upload", "target": "cwe-434", "predicate": "maps_to"},
+          {"source": "vuln.upload", "target": "tech.sandbox", "predicate": "executes_within"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "vuln.path-traversal",
+      "source_ref": "builtin/vuln-classes/path-traversal",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test"],
+      "content": "路径穿越测试：对文件下载/读取参数做 ../、URL 编码、双编码、绝对路径与规范化解码变体；结合响应内容判断可读文件。证据要求：baseline、变异请求、响应内容样本、文件指纹。禁止读取 secret 进模型上下文，只记录可读性与内容 hash/摘要。",
+      "graph": {
+        "nodes": [
+          {"id": "vuln.path-traversal", "type": "vuln_class", "label": "Path Traversal"},
+          {"id": "cwe-22", "type": "cwe", "label": "CWE-22 Path Traversal", "properties": {"cwe": "22"}}
+        ],
+        "edges": [
+          {"source": "vuln.path-traversal", "target": "cwe-22", "predicate": "maps_to"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "vuln.deserialization",
+      "source_ref": "builtin/vuln-classes/deserialization",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test"],
+      "content": "反序列化测试：识别 java/python/php/ruby 序列化格式、签名与 gadget 链；用被动指纹与响应差异判断，不经授权的 exploit 只在靶场执行。证据要求：序列化输入位置、格式指纹、报错/行为差异、gadget 可用性说明。工具映射：semgrep/codeql 静态辅助 + proxy 重放。",
+      "graph": {
+        "nodes": [
+          {"id": "vuln.deserialization", "type": "vuln_class", "label": "Insecure Deserialization"},
+          {"id": "cwe-502", "type": "cwe", "label": "CWE-502 Deserialization", "properties": {"cwe": "502"}}
+        ],
+        "edges": [
+          {"source": "vuln.deserialization", "target": "cwe-502", "predicate": "maps_to"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "vuln.graphql",
+      "source_ref": "builtin/vuln-classes/graphql",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test"],
+      "content": "GraphQL 测试：introspection 枚举 schema、查询/变更/订阅拆分、对象 ID 越权、批量查询限流、深度/复杂度攻击。证据要求：schema 片段、请求/响应对、权限矩阵、对象引用。禁止用 introspection 结果覆盖 scope；发现 debug 端点时记录为观察而非自动利用。",
+      "graph": {
+        "nodes": [
+          {"id": "vuln.graphql", "type": "vuln_class", "label": "GraphQL API"},
+          {"id": "tech.graphql", "type": "concept", "label": "GraphQL observation model"}
+        ],
+        "edges": [
+          {"source": "vuln.graphql", "target": "tech.graphql", "predicate": "tested_via"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "vuln.websocket",
+      "source_ref": "builtin/vuln-classes/websocket",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test"],
+      "content": "WebSocket 测试：握手鉴权、消息帧越权、origin 校验、订阅/广播隔离、重连会话固定。证据要求：握手请求、帧序列、auth context、消息接收方隔离结果。当前观察模型需扩展 websocket 帧，未支持时标记 capability 缺失而不是伪造观察。",
+      "graph": {
+        "nodes": [
+          {"id": "vuln.websocket", "type": "vuln_class", "label": "WebSocket"},
+          {"id": "tech.websocket", "type": "concept", "label": "WebSocket observation model"}
+        ],
+        "edges": [
+          {"source": "vuln.websocket", "target": "tech.websocket", "predicate": "requires"}
+        ]
+      }
+    }
+  ]
+}

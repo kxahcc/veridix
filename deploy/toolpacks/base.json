@@ -1,0 +1,298 @@
+{
+  "name": "base",
+  "version": "0.2.0",
+  "image": "veridix-tools:full",
+  "digest": "sha256:bf67b075a85eb095689c5bacfe0bbd3d5819e0075abd243685c782fc4c4263ec",
+  "license": "MIT",
+  "capabilities": [
+    "http.request",
+    "dns.resolve",
+    "file.identify",
+    "json.parse",
+    "shell.execute",
+    "oast.callback"
+  ],
+  "runner_requirements": [
+    "container"
+  ],
+  "network": "egress_proxy",
+  "files": {
+    "read": [
+      "/workspace/input"
+    ],
+    "write": [
+      "/workspace/output"
+    ]
+  },
+  "risk_defaults": {
+    "shell.probe": "L1",
+    "base.http.request": "L1",
+    "base.dns.resolve": "L1",
+    "base.file.identify": "L1",
+    "base.json.parse": "L1",
+    "oast.create": "L1",
+    "oast.check": "L1"
+  },
+  "tools": [
+    "shell.probe",
+    "base.http.request",
+    "base.dns.resolve",
+    "base.file.identify",
+    "base.json.parse",
+    "oast.create",
+    "oast.check"
+  ],
+  "healthcheck": [
+    "sh",
+    "-c",
+    "command -v curl && command -v dig && command -v jq && command -v file"
+  ],
+  "tool_definitions": [
+    {
+      "ref": "shell.probe",
+      "name": "shell.probe",
+      "description": "Run a trivial command in the S2 sandbox",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 30,
+      "command_template": [
+        "echo",
+        "{target}"
+      ],
+      "examples": [
+        "echo https://target.example"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable"
+      ]
+    },
+    {
+      "ref": "base.http.request",
+      "name": "base.http.request",
+      "description": "Send an HTTP request and print status plus body",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "default": "GET"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "curl",
+        "-sS",
+        "-L",
+        "-X",
+        "{method}",
+        "-w",
+        "\\nHTTP_STATUS:%{http_code}",
+        "{url}"
+      ],
+      "examples": [
+        "curl -sS -L -X GET -w '\\nHTTP_STATUS:%{http_code}' https://target"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "http_error"
+      ]
+    },
+    {
+      "ref": "base.dns.resolve",
+      "name": "base.dns.resolve",
+      "description": "Resolve DNS records for a hostname",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "hostname": {
+            "type": "string"
+          },
+          "record": {
+            "type": "string",
+            "default": "A"
+          }
+        },
+        "required": [
+          "hostname"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 30,
+      "command_template": [
+        "dig",
+        "+short",
+        "{record}",
+        "{hostname}"
+      ],
+      "examples": [
+        "dig +short A target.example"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "dns_failed"
+      ]
+    },
+    {
+      "ref": "base.file.identify",
+      "name": "base.file.identify",
+      "description": "Identify the file type of a workspace artifact",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 30,
+      "command_template": [
+        "file",
+        "{path}"
+      ],
+      "examples": [
+        "file /workspace/input/sample.bin"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "file_not_found"
+      ]
+    },
+    {
+      "ref": "base.json.parse",
+      "name": "base.json.parse",
+      "description": "Parse JSON output from a file with jq",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 30,
+      "command_template": [
+        "jq",
+        "{query}",
+        "{path}"
+      ],
+      "examples": [
+        "jq '.items[].endpoint' /workspace/output/results.json"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "parse_error"
+      ]
+    },
+    {
+      "ref": "oast.create",
+      "name": "oast.create",
+      "description": "Create a one-time OAST callback token for out-of-band testing",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "native",
+      "sandbox_profile": "S0",
+      "timeout_seconds": 10,
+      "examples": [
+        "oast.create purpose=blind-ssrf"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable"
+      ]
+    },
+    {
+      "ref": "oast.check",
+      "name": "oast.check",
+      "description": "Check whether an OAST callback was received for a token",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "native",
+      "sandbox_profile": "S0",
+      "timeout_seconds": 10,
+      "examples": [
+        "oast.check token=oast_abc"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable"
+      ]
+    }
+  ]
+}

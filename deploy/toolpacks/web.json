@@ -1,0 +1,1005 @@
+{
+  "name": "web",
+  "version": "0.2.0",
+  "image": "veridix-tools:full",
+  "digest": "sha256:bf67b075a85eb095689c5bacfe0bbd3d5819e0075abd243685c782fc4c4263ec",
+  "license": "MIT",
+  "capabilities": [
+    "browser.action",
+    "http.request",
+    "directory.brute",
+    "parameter.fuzz",
+    "sql.injection",
+    "web.fuzz",
+    "graphql.test",
+    "websocket.test",
+    "authz.test",
+    "ssrf.test",
+    "scanner.connector",
+    "web.scan.nikto",
+    "web.scan.dirsearch",
+    "web.scan.wpscan",
+    "web.recon.tech"
+  ],
+  "runner_requirements": [
+    "browser",
+    "container"
+  ],
+  "network": "egress_proxy",
+  "files": {
+    "read": [
+      "/workspace/input"
+    ],
+    "write": [
+      "/workspace/output"
+    ]
+  },
+  "risk_defaults": {
+    "browser.open": "L1",
+    "proxy.list": "L1",
+    "web.replay": "L2",
+    "web.graphql.test": "L2",
+    "web.websocket.test": "L2",
+    "web.authz.test": "L2",
+    "web.ssrf.test": "L2",
+    "web.file-upload.test": "L3",
+    "web.lfi.test": "L3",
+    "web.owasp.test": "L3",
+    "web.dom-xss.test": "L3",
+    "web.directory.brute": "L2",
+    "web.fuzz.parameters": "L2",
+    "web.ffuf.scan": "L2",
+    "web.sqlmap.scan": "L3",
+    "web.dirb.scan": "L2",
+    "web.wfuzz": "L2",
+    "web.nikto.scan": "L3",
+    "web.dirsearch.scan": "L2",
+    "web.whatweb.scan": "L1",
+    "web.wpscan.scan": "L3",
+    "zap.scan": "L3",
+    "caido.scan": "L3",
+    "burp.scan": "L3"
+  },
+  "tools": [
+    "browser.open",
+    "proxy.list",
+    "web.replay",
+    "web.directory.brute",
+    "web.fuzz.parameters",
+    "web.ffuf.scan",
+    "web.sqlmap.scan",
+    "web.dirb.scan",
+    "web.wfuzz",
+    "web.nikto.scan",
+    "web.dirsearch.scan",
+    "web.whatweb.scan",
+    "web.wpscan.scan",
+    "web.file-upload.test",
+    "web.lfi.test",
+    "web.owasp.test",
+    "web.dom-xss.test",
+    "zap.scan",
+    "caido.scan",
+    "burp.scan"
+  ],
+  "healthcheck": [
+    "sh",
+    "-c",
+    "command -v gobuster && command -v ffuf && command -v sqlmap && command -v dirb && command -v wfuzz && command -v nikto && command -v dirsearch && command -v whatweb && command -v wpscan"
+  ],
+  "tool_definitions": [
+    {
+      "ref": "browser.open",
+      "name": "browser.open",
+      "description": "Open a URL in the managed browser through the proxy",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "cookie": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "browser",
+      "sandbox_profile": "S2"
+    },
+    {
+      "ref": "proxy.list",
+      "name": "proxy.list",
+      "description": "List captured proxy observations",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "endpoint"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "native",
+      "sandbox_profile": "S2"
+    },
+    {
+      "ref": "web.replay",
+      "name": "web.replay",
+      "description": "Replay a captured observation with mutation presets",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "request_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "native",
+      "sandbox_profile": "S2"
+    },
+    {
+      "ref": "web.graphql.test",
+      "name": "web.graphql.test",
+      "description": "Run GraphQL baseline and tampered mutations with response diff",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "variables": {
+            "type": "object"
+          },
+          "headers": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "endpoint",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "native",
+      "sandbox_profile": "S2"
+    },
+    {
+      "ref": "web.websocket.test",
+      "name": "web.websocket.test",
+      "description": "Send baseline and tampered WebSocket frames and compare echo/state",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "channel",
+          "payload"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "native",
+      "sandbox_profile": "S2"
+    },
+    {
+      "ref": "web.authz.test",
+      "name": "web.authz.test",
+      "description": "Run a two-context authorization matrix cell over real HTTP",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "description": "Full URL path being tested, for example /admin"
+          },
+          "method": {
+            "type": "string",
+            "description": "HTTP method, defaults to GET"
+          },
+          "low_privilege_token": {
+            "type": "string",
+            "description": "Bearer token for the low-privilege context"
+          },
+          "high_privilege_token": {
+            "type": "string",
+            "description": "Bearer token for the high-privilege context"
+          },
+          "object_id": {
+            "type": "string",
+            "description": "Object identifier when the matrix cell is object-scoped"
+          }
+        },
+        "required": [
+          "endpoint",
+          "low_privilege_token",
+          "high_privilege_token"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "native",
+      "sandbox_profile": "S2",
+      "examples": [
+        "web.authz.test endpoint=/admin method=GET low_privilege_token=user-token high_privilege_token=admin-token object_id=user_1"
+      ]
+    },
+    {
+      "ref": "web.ssrf.test",
+      "name": "web.ssrf.test",
+      "description": "Send a blind SSRF fetch to a one-time callback URL",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "callback_url": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "callback_url"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "native",
+      "sandbox_profile": "S2"
+    },
+    {
+      "ref": "web.file-upload.test",
+      "name": "web.file-upload.test",
+      "description": "Authenticated unrestricted file upload test that uploads a PHP marker and verifies execution",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "upload_path": {
+            "type": "string"
+          },
+          "login_path": {
+            "type": "string"
+          },
+          "security_path": {
+            "type": "string"
+          },
+          "uploads_dir": {
+            "type": "string"
+          },
+          "login_fields": {
+            "type": "object"
+          },
+          "set_security": {
+            "type": "boolean"
+          },
+          "marker": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "native",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120
+    },
+    {
+      "ref": "web.lfi.test",
+      "name": "web.lfi.test",
+      "description": "Authenticated local file inclusion test that reads /etc/passwd through the target parameter",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "lfi_path": {
+            "type": "string"
+          },
+          "login_path": {
+            "type": "string"
+          },
+          "security_path": {
+            "type": "string"
+          },
+          "file_to_read": {
+            "type": "string"
+          },
+          "login_fields": {
+            "type": "object"
+          },
+          "set_security": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "native",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120
+    },
+    {
+      "ref": "web.owasp.test",
+      "name": "web.owasp.test",
+      "description": "Run one OWASP-style web check: command_injection, backup_file, xss_reflected, xss_stored, rate_limit, csrf, weak_session, info_disclosure, or security_headers",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "check": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "login_path": {
+            "type": "string"
+          },
+          "security_path": {
+            "type": "string"
+          },
+          "exec_path": {
+            "type": "string"
+          },
+          "backup_path": {
+            "type": "string"
+          },
+          "xss_r_path": {
+            "type": "string"
+          },
+          "xss_s_path": {
+            "type": "string"
+          },
+          "csrf_path": {
+            "type": "string"
+          },
+          "weak_id_path": {
+            "type": "string"
+          },
+          "setup_path": {
+            "type": "string"
+          },
+          "phpinfo_path": {
+            "type": "string"
+          },
+          "phpids_path": {
+            "type": "string"
+          },
+          "config_dir": {
+            "type": "string"
+          },
+          "uploads_dir": {
+            "type": "string"
+          },
+          "login_fields": {
+            "type": "object"
+          },
+          "set_security": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "target",
+          "check"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "native",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120
+    },
+    {
+      "ref": "web.dom-xss.test",
+      "name": "web.dom-xss.test",
+      "description": "Verify DOM-based XSS by loading the target page in a real browser and checking that a hash-parameter payload executes",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "marker": {
+            "type": "string"
+          },
+          "login_path": {
+            "type": "string"
+          },
+          "security_path": {
+            "type": "string"
+          },
+          "dom_xss_path": {
+            "type": "string"
+          },
+          "login_fields": {
+            "type": "object"
+          },
+          "set_security": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "native",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120
+    },
+    {
+      "ref": "web.directory.brute",
+      "name": "web.directory.brute",
+      "description": "Enumerate web directories with gobuster",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "wordlist": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "wordlist"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 600,
+      "output_parser": "gobuster_text",
+      "command_template": [
+        "gobuster",
+        "dir",
+        "-u",
+        "{url}",
+        "-w",
+        "{wordlist}",
+        "-q"
+      ],
+      "examples": [
+        "gobuster dir -u https://target -w wordlist.txt -q"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "web.fuzz.parameters",
+      "name": "web.fuzz.parameters",
+      "description": "Fuzz URL parameters with ffuf",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "wordlist": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "wordlist"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 600,
+      "output_parser": "ffuf_jsonl",
+      "command_template": [
+        "ffuf",
+        "-u",
+        "{url}",
+        "-w",
+        "{wordlist}",
+        "-json"
+      ],
+      "examples": [
+        "ffuf -u 'https://target/?id=FUZZ' -w params.txt"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "web.sqlmap.scan",
+      "name": "web.sqlmap.scan",
+      "description": "Run sqlmap against a target URL",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "cookie": {
+            "type": "string",
+            "default": "",
+            "description": "Session cookie header value, optional"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 900,
+      "output_parser": "sqlmap_text",
+      "command_template": [
+        "sh",
+        "-c",
+        "export HOME=/workspace TMPDIR=/workspace; cd /workspace && sqlmap -u \"$1\" --batch --crawl 0 ${2:+--cookie \"$2\"}",
+        "sqlmap-scan",
+        "{url}",
+        "{cookie}"
+      ],
+      "examples": [
+        "sqlmap -u 'https://target/?id=1' --batch --crawl 0"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "web.dirb.scan",
+      "name": "web.dirb.scan",
+      "description": "Brute-force web paths with dirb",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "wordlist": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 600,
+      "output_parser": "dirb_text",
+      "command_template": [
+        "dirb",
+        "{url}",
+        "{wordlist}"
+      ],
+      "examples": [
+        "dirb https://target wordlist.txt"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "web.wfuzz",
+      "name": "web.wfuzz",
+      "description": "Fuzz web requests with wfuzz",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "wordlist": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "wordlist"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 600,
+      "command_template": [
+        "wfuzz",
+        "-w",
+        "{wordlist}",
+        "{url}"
+      ],
+      "examples": [
+        "wfuzz -w params.txt 'https://target/?id=FUZZ'"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "web.nikto.scan",
+      "name": "web.nikto.scan",
+      "description": "Run a nikto web server scan and export JSON findings",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "tuning": {
+            "type": "string",
+            "default": "1"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 600,
+      "output_parser": "nikto_json",
+      "command_template": [
+        "nikto",
+        "-h",
+        "{url}",
+        "-Tuning",
+        "{tuning}",
+        "-Format",
+        "json",
+        "-output",
+        "-"
+      ],
+      "examples": [
+        "nikto -h https://target -Format json -output -"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "web.dirsearch.scan",
+      "name": "web.dirsearch.scan",
+      "description": "Enumerate web paths with dirsearch",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "extensions": {
+            "type": "string",
+            "default": "php,asp,aspx,jsp,html,js"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 600,
+      "output_parser": "dirsearch_text",
+      "command_template": [
+        "dirsearch",
+        "-u",
+        "{url}",
+        "-e",
+        "{extensions}",
+        "-t",
+        "5",
+        "--no-color"
+      ],
+      "examples": [
+        "dirsearch -u https://target -e php,html"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "web.whatweb.scan",
+      "name": "web.whatweb.scan",
+      "description": "Identify web technologies and server metadata with whatweb",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120,
+      "output_parser": "whatweb_text",
+      "command_template": [
+        "whatweb",
+        "--color=never",
+        "{url}"
+      ],
+      "examples": [
+        "whatweb https://target"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "web.wpscan.scan",
+      "name": "web.wpscan.scan",
+      "description": "Scan a WordPress site with wpscan and export JSON findings",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 900,
+      "output_parser": "wpscan_json",
+      "command_template": [
+        "wpscan-json",
+        "--url",
+        "{url}",
+        "--no-banner"
+      ],
+      "examples": [
+        "wpscan --url https://target --format json"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "zap.scan",
+      "name": "zap.scan",
+      "description": "Run a ZAP spider or active scan on a configured ZAP instance and export alerts",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "spider",
+              "active"
+            ],
+            "default": "active"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "remote",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 900,
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "connector_failed"
+      ]
+    },
+    {
+      "ref": "caido.scan",
+      "name": "caido.scan",
+      "description": "Run an active scan on a configured Caido instance and export issues",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "remote",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 900,
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "connector_failed"
+      ]
+    },
+    {
+      "ref": "burp.scan",
+      "name": "burp.scan",
+      "description": "Start a scan on a configured Burp REST/Event Bridge and export issues",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "remote",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 900,
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "connector_failed"
+      ]
+    },
+    {
+      "ref": "web.ffuf.scan",
+      "name": "web.ffuf.scan",
+      "description": "Fast web fuzzing with ffuf",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "wordlist": {
+            "type": "string",
+            "default": "/usr/share/dirb/wordlists/common.txt"
+          },
+          "status_codes": {
+            "type": "string",
+            "default": "200,204,301,302,307,401,403"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 300,
+      "output_parser": "ffuf_jsonl",
+      "command_template": [
+        "ffuf",
+        "-w",
+        "{wordlist}",
+        "-u",
+        "{url}",
+        "-mc",
+        "{status_codes}",
+        "-of",
+        "json"
+      ],
+      "examples": [
+        "ffuf -w /usr/share/dirb/wordlists/common.txt -u https://target/FUZZ -mc 200,301"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+ARG BASE_IMAGE=veridix-tools:full
+FROM ${BASE_IMAGE}
+
+ARG CODEQL_URL=https://github.com/github/codeql-action/releases/latest/download/codeql-bundle-linux64.tar.gz
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install --break-system-packages --no-cache-dir \
+        semgrep \
+        detect-secrets
+
+RUN curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+RUN curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+RUN curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+RUN mkdir -p /opt/codeql \
+    && curl -sSL --max-time 1800 -o /tmp/codeql.tgz "$CODEQL_URL" \
+    && tar -xzf /tmp/codeql.tgz -C /opt/codeql --strip-components=1 \
+    && ln -sf /opt/codeql/codeql /usr/local/bin/codeql \
+    && rm -f /tmp/codeql.tgz
+
+CMD ["sh", "-c", "echo veridix-tools-code ready; command -v semgrep; command -v detect-secrets; command -v trivy; command -v syft; command -v grype; command -v codeql"]

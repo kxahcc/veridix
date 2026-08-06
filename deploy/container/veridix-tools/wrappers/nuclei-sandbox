@@ -1,0 +1,10 @@
+#!/bin/sh
+set -u
+
+# Nuclei writes engine config under $HOME/.config; the Veridix sandbox rootfs is
+# read-only, so redirect home to the writable tmpfs workspace.
+export HOME=/workspace
+export TMPDIR=/workspace
+mkdir -p "$HOME" "$HOME/.config"
+
+exec nuclei "$@"

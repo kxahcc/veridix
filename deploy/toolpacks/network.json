@@ -1,0 +1,592 @@
+{
+  "name": "network",
+  "version": "0.1.0",
+  "image": "veridix-tools:full",
+  "digest": "sha256:bf67b075a85eb095689c5bacfe0bbd3d5819e0075abd243685c782fc4c4263ec",
+  "license": "MIT",
+  "capabilities": [
+    "port.scan",
+    "service.identify",
+    "network.connect",
+    "tls.probe",
+    "dns.resolve",
+    "traffic.capture",
+    "arp.discover",
+    "dns.recon"
+  ],
+  "runner_requirements": [
+    "container"
+  ],
+  "network": "egress_proxy",
+  "files": {
+    "read": [
+      "/workspace/input"
+    ],
+    "write": [
+      "/workspace/output"
+    ]
+  },
+  "risk_defaults": {
+    "nmap.scan": "L3",
+    "masscan.scan": "L3",
+    "network.tcp.connect": "L2",
+    "network.tls.probe": "L2",
+    "network.dns.lookup": "L1",
+    "network.ping": "L1",
+    "network.traceroute": "L1",
+    "network.capture": "L4",
+    "network.arp.discover": "L2",
+    "network.dns.recon": "L1",
+    "network.subfinder.scan": "L2",
+    "network.httpx.probe": "L1",
+    "network.naabu.scan": "L2"
+  },
+  "tools": [
+    "nmap.scan",
+    "masscan.scan",
+    "network.tcp.connect",
+    "network.tls.probe",
+    "network.dns.lookup",
+    "network.ping",
+    "network.traceroute",
+    "network.capture",
+    "network.arp.discover",
+    "network.dns.recon",
+    "network.subfinder.scan",
+    "network.httpx.probe",
+    "network.naabu.scan"
+  ],
+  "healthcheck": [
+    "sh",
+    "-c",
+    "command -v nmap && command -v masscan && command -v nc && command -v dig && command -v tcpdump && command -v arp-scan && command -v dnsrecon && command -v subfinder && command -v httpx && command -v naabu"
+  ],
+  "tool_definitions": [
+    {
+      "ref": "nmap.scan",
+      "name": "nmap.scan",
+      "description": "Run an nmap service scan against a target host (not a URL); use the container network hostname for lab targets",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "ports": {
+            "type": "string",
+            "default": "1-10000"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 180,
+      "output_parser": "nmap_xml",
+      "command_template": [
+        "nmap",
+        "-sV",
+        "-oX",
+        "-",
+        "-p",
+        "{ports}",
+        "{target}"
+      ],
+      "examples": [
+        "nmap -sV -p 80,443 host",
+        "nmap -sV -p 80 compose-dvwa-1"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "masscan.scan",
+      "name": "masscan.scan",
+      "description": "Run a high-rate port scan with masscan",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "ports": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "string",
+            "default": "1000"
+          }
+        },
+        "required": [
+          "target",
+          "ports"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 300,
+      "command_template": [
+        "masscan",
+        "{target}",
+        "-p{ports}",
+        "--rate",
+        "{rate}"
+      ],
+      "examples": [
+        "masscan 10.0.0.0/24 -p1-65535 --rate 1000"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "network.tcp.connect",
+      "name": "network.tcp.connect",
+      "description": "Check TCP connectivity to a host and port",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "string"
+          },
+          "timeout": {
+            "type": "string",
+            "default": "5"
+          }
+        },
+        "required": [
+          "host",
+          "port"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "nc",
+        "-zv",
+        "-w",
+        "{timeout}",
+        "{host}",
+        "{port}"
+      ],
+      "examples": [
+        "nc -zv -w 5 host 443"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "connect_failed"
+      ]
+    },
+    {
+      "ref": "network.tls.probe",
+      "name": "network.tls.probe",
+      "description": "Probe TLS certificate details with openssl",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "string",
+            "default": "443"
+          }
+        },
+        "required": [
+          "host",
+          "port"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "openssl",
+        "s_client",
+        "-connect",
+        "{host}:{port}",
+        "-servername",
+        "{host}"
+      ],
+      "examples": [
+        "openssl s_client -connect host:443 -servername host"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "tls_failed"
+      ]
+    },
+    {
+      "ref": "network.dns.lookup",
+      "name": "network.dns.lookup",
+      "description": "Resolve DNS records with dig",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "hostname": {
+            "type": "string"
+          },
+          "record": {
+            "type": "string",
+            "default": "A"
+          }
+        },
+        "required": [
+          "hostname"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 30,
+      "command_template": [
+        "dig",
+        "+short",
+        "{record}",
+        "{hostname}"
+      ],
+      "examples": [
+        "dig +short A host"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "dns_failed"
+      ]
+    },
+    {
+      "ref": "network.ping",
+      "name": "network.ping",
+      "description": "Send ICMP echo requests to a host",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "count": {
+            "type": "string",
+            "default": "3"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "ping",
+        "-c",
+        "{count}",
+        "{host}"
+      ],
+      "examples": [
+        "ping -c 3 host"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "icmp_failed"
+      ]
+    },
+    {
+      "ref": "network.traceroute",
+      "name": "network.traceroute",
+      "description": "Trace the route to a host",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120,
+      "command_template": [
+        "traceroute",
+        "{host}"
+      ],
+      "examples": [
+        "traceroute host"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "trace_failed"
+      ]
+    },
+    {
+      "ref": "network.capture",
+      "name": "network.capture",
+      "description": "Capture packets with tcpdump",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "interface": {
+            "type": "string"
+          },
+          "count": {
+            "type": "string",
+            "default": "100"
+          }
+        },
+        "required": [
+          "interface"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L4",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 120,
+      "command_template": [
+        "tcpdump",
+        "-i",
+        "{interface}",
+        "-c",
+        "{count}"
+      ],
+      "examples": [
+        "tcpdump -i eth0 -c 100"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "capture_failed"
+      ]
+    },
+    {
+      "ref": "network.arp.discover",
+      "name": "network.arp.discover",
+      "description": "Discover live hosts on a subnet with arp-scan",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "cidr": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cidr"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 120,
+      "command_template": [
+        "arp-scan",
+        "{cidr}"
+      ],
+      "examples": [
+        "arp-scan 10.0.0.0/24"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "arp_failed"
+      ]
+    },
+    {
+      "ref": "network.dns.recon",
+      "name": "network.dns.recon",
+      "description": "Run DNS enumeration and zone checks with dnsrecon",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 300,
+      "command_template": [
+        "dnsrecon",
+        "-d",
+        "{domain}"
+      ],
+      "examples": [
+        "dnsrecon -d example.com"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "dns_failed"
+      ]
+    },
+    {
+      "ref": "network.subfinder.scan",
+      "name": "network.subfinder.scan",
+      "description": "Enumerate subdomains with subfinder",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 300,
+      "output_parser": "subdomain_list",
+      "command_template": [
+        "subfinder",
+        "-d",
+        "{domain}",
+        "-silent"
+      ],
+      "examples": [
+        "subfinder -d example.com -silent"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "network.httpx.probe",
+      "name": "network.httpx.probe",
+      "description": "Probe HTTP services and fingerprint them with httpx",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120,
+      "output_parser": "httpx_probe",
+      "command_template": [
+        "httpx",
+        "-silent",
+        "-u",
+        "{target}",
+        "-sc",
+        "-title",
+        "-timeout",
+        "10"
+      ],
+      "examples": [
+        "httpx -silent -u https://target -sc -title"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "network.naabu.scan",
+      "name": "network.naabu.scan",
+      "description": "Fast port discovery with naabu",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "ports": {
+            "type": "string",
+            "default": "1-10000"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 300,
+      "output_parser": "port_list",
+      "command_template": [
+        "naabu",
+        "-host",
+        "{target}",
+        "-p",
+        "{ports}",
+        "-silent",
+        "-sr",
+        "-Pn"
+      ],
+      "examples": [
+        "naabu -host target -p 1-10000 -silent -sr -Pn"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    }
+  ]
+}

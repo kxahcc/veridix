@@ -1,0 +1,125 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "hw.playbook.recon",
+      "source_ref": "builtin/hw/redteam-recon",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["host", "network", "web_discovery", "hw"],
+      "content": "护网/红队信息收集打法：先确认授权范围与目标指纹，再用子域名枚举（subfinder）、端口与服务识别（nmap -sV）、Web 指纹（whatweb/httpx）建立资产清单；对每个资产记录来源、时间、工具版本并进入 Endpoint Model，避免重复扫描。ATT&CK 映射：T1595 Active Scanning、T1592 Gather Victim Host Information。工具映射：subfinder、nmap、httpx、whatweb、fscan。",
+      "graph": {
+        "nodes": [
+          {"id": "hw.playbook.recon", "type": "playbook", "label": "Red Team Recon"},
+          {"id": "tt1595", "type": "attck", "label": "T1595 Active Scanning"},
+          {"id": "tech.nmap", "type": "tool", "label": "nmap"},
+          {"id": "tech.subfinder", "type": "tool", "label": "subfinder"}
+        ],
+        "edges": [
+          {"source": "hw.playbook.recon", "target": "tt1595", "predicate": "implements"},
+          {"source": "hw.playbook.recon", "target": "tech.nmap", "predicate": "uses"},
+          {"source": "hw.playbook.recon", "target": "tech.subfinder", "predicate": "uses"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "hw.playbook.boundary",
+      "source_ref": "builtin/hw/redteam-boundary",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_test", "host", "hw"],
+      "content": "边界突破打法：优先枚举暴露面（nuclei 模板、fscan 内网探活、nmap 高危端口），对 Web 入口做目录爆破（ffuf/gobuster/dirsearch）与漏洞扫描（nikto/wpscan/sqlmap）；只对授权范围内的目标使用 metasploit/exp 验证，且 exploit 必须在 S2+ 沙箱内执行并保留完整请求响应证据。ATT&CK 映射：T1190 Exploit Public-Facing Application、T1133 External Remote Services。",
+      "graph": {
+        "nodes": [
+          {"id": "hw.playbook.boundary", "type": "playbook", "label": "Boundary Breakthrough"},
+          {"id": "tt1190", "type": "attck", "label": "T1190 Exploit Public-Facing Application"},
+          {"id": "tech.nuclei", "type": "tool", "label": "nuclei"},
+          {"id": "tech.ffuf", "type": "tool", "label": "ffuf"}
+        ],
+        "edges": [
+          {"source": "hw.playbook.boundary", "target": "tt1190", "predicate": "implements"},
+          {"source": "hw.playbook.boundary", "target": "tech.nuclei", "predicate": "uses"},
+          {"source": "hw.playbook.boundary", "target": "tech.ffuf", "predicate": "uses"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "hw.playbook.web-exploit",
+      "source_ref": "builtin/hw/redteam-web-exploit",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_test", "verifier", "hw"],
+      "content": "Web 漏洞利用与验证打法：结构化扫描器（nuclei/sqlmap/zap/burp）先产出 candidate，再用 replay 与 Oracle 验证，SQLi 需提供参数、请求、响应与数据库指纹；XSS/SSRF 使用 OAST 回调证明外带；只有 verified 才进入 finding，negative evidence 也要记录。ATT&CK 映射：T1213 Data from Information Repositories、T1190。",
+      "graph": {
+        "nodes": [
+          {"id": "hw.playbook.web-exploit", "type": "playbook", "label": "Web Exploit & Verify"},
+          {"id": "tt1190", "type": "attck", "label": "T1190"},
+          {"id": "tech.sqlmap", "type": "tool", "label": "sqlmap"},
+          {"id": "concept.oast", "type": "concept", "label": "OAST"}
+        ],
+        "edges": [
+          {"source": "hw.playbook.web-exploit", "target": "tech.sqlmap", "predicate": "uses"},
+          {"source": "hw.playbook.web-exploit", "target": "concept.oast", "predicate": "requires"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "hw.playbook.lateral",
+      "source_ref": "builtin/hw/redteam-lateral",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["host", "ad", "hw"],
+      "content": "内网横向打法：拿到凭据后先做主机与共享枚举（smbmap/enum4linux/impacket），用 hydra 只做授权范围内的低烈度口令验证；AD 场景验证 Kerberoast/AS-REP 前确认授权，横向连接使用已有凭据并记录会话；所有凭据进入 SecretRef，禁止进入普通事件与模型上下文。ATT&CK 映射：T1021 Remote Services、T1078 Valid Accounts、T1558 Steal or Forge Kerberos Tickets。",
+      "graph": {
+        "nodes": [
+          {"id": "hw.playbook.lateral", "type": "playbook", "label": "Lateral Movement"},
+          {"id": "tt1021", "type": "attck", "label": "T1021 Remote Services"},
+          {"id": "tech.impacket", "type": "tool", "label": "impacket"},
+          {"id": "tech.smbmap", "type": "tool", "label": "smbmap"}
+        ],
+        "edges": [
+          {"source": "hw.playbook.lateral", "target": "tt1021", "predicate": "implements"},
+          {"source": "hw.playbook.lateral", "target": "tech.impacket", "predicate": "uses"},
+          {"source": "hw.playbook.lateral", "target": "tech.smbmap", "predicate": "uses"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "hw.playbook.persistence",
+      "source_ref": "builtin/hw/redteam-persistence",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["host", "ad", "hw"],
+      "content": "权限维持与痕迹清理打法：只有在明确授权与保留必要性的场景才做持久化；建立计划任务/服务/启动项前记录创建与删除命令，演练结束必须清理；清理日志时只删除本方产生的痕迹，不破坏目标原有审计数据。ATT&CK 映射：T1543 Create or Modify System Process、T1070 Indicator Removal。",
+      "graph": {
+        "nodes": [
+          {"id": "hw.playbook.persistence", "type": "playbook", "label": "Persistence & Cleanup"},
+          {"id": "tt1543", "type": "attck", "label": "T1543 Create or Modify System Process"},
+          {"id": "tt1070", "type": "attck", "label": "T1070 Indicator Removal"}
+        ],
+        "edges": [
+          {"source": "hw.playbook.persistence", "target": "tt1543", "predicate": "maps_to"},
+          {"source": "hw.playbook.persistence", "target": "tt1070", "predicate": "maps_to"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "hw.playbook.report",
+      "source_ref": "builtin/hw/redteam-report",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["verifier", "report", "hw"],
+      "content": "护网报告与证据交付标准：每个 finding 必须含资产、漏洞类别、严重级别、CVSS、复现步骤、请求/响应证据与修复建议；按资产与类别汇总风险，明确哪些已验证、哪些仅候选；报告可导出 Markdown/HTML/PDF，证据打包随报告交付。",
+      "graph": {
+        "nodes": [
+          {"id": "hw.playbook.report", "type": "playbook", "label": "Report & Evidence"},
+          {"id": "concept.cvss", "type": "concept", "label": "CVSS"},
+          {"id": "concept.replay-proof", "type": "concept", "label": "ReplayProof"}
+        ],
+        "edges": [
+          {"source": "hw.playbook.report", "target": "concept.cvss", "predicate": "requires"},
+          {"source": "hw.playbook.report", "target": "concept.replay-proof", "predicate": "requires"}
+        ]
+      }
+    }
+  ]
+}

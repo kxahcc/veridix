@@ -1,0 +1,126 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "playbook.recon",
+      "source_ref": "builtin/playbooks/recon",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["host", "network", "web_discovery"],
+      "content": "资产收集打法：先域名/子域/IP 段建模，再端口与指纹识别，最后按服务类型选扫描器。TTP 映射：T1595 Active Scanning、T1592 Gather Victim Host Information。工具映射：dnsrecon、subfinder、whatweb、nmap、fscan。每个资产进入 Endpoint Model 时记录来源、时间与工具版本，避免重复扫描。",
+      "graph": {
+        "nodes": [
+          {"id": "playbook.recon", "type": "playbook", "label": "Asset Recon"},
+          {"id": "tt1595", "type": "attck", "label": "T1595 Active Scanning"},
+          {"id": "tech.nmap", "type": "tool", "label": "nmap"},
+          {"id": "tech.dnsrecon", "type": "tool", "label": "dnsrecon"}
+        ],
+        "edges": [
+          {"source": "playbook.recon", "target": "tt1595", "predicate": "implements"},
+          {"source": "playbook.recon", "target": "tech.nmap", "predicate": "uses"},
+          {"source": "playbook.recon", "target": "tech.dnsrecon", "predicate": "uses"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "playbook.service-validation",
+      "source_ref": "builtin/playbooks/service-validation",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["host", "network"],
+      "content": "服务验证打法：nmap 服务版本确认开放端口，whatweb 指纹 Web 服务，smbmap/enum4linux 验证 SMB，SNMP 探测 community，再决定是否进入凭据尝试。TTP 映射：T1046 Network Service Discovery、T1049 System Network Connections。证据要求：端口/服务/版本指纹、探测请求与响应摘要。",
+      "graph": {
+        "nodes": [
+          {"id": "playbook.service-validation", "type": "playbook", "label": "Service Validation"},
+          {"id": "tt1046", "type": "attck", "label": "T1046 Network Service Discovery"},
+          {"id": "tech.smbmap", "type": "tool", "label": "smbmap"}
+        ],
+        "edges": [
+          {"source": "playbook.service-validation", "target": "tt1046", "predicate": "implements"},
+          {"source": "playbook.service-validation", "target": "tech.smbmap", "predicate": "uses"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "playbook.web-discovery",
+      "source_ref": "builtin/playbooks/web-discovery",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_discovery", "web_test"],
+      "content": "Web 发现打法：浏览器/代理先建基线，endpoint 规范化（路径参数、认证状态、方法语义），再用 ffuf/gobuster/dirsearch 做字典发现，nikto/wpscan 做服务级检查。TTP 映射：T1595.001 Active Scanning: Scanning IP Blocks、T1592.003 Software。新 endpoint 必须进入 Endpoint Model 并打上 auth_state 与来源工具。",
+      "graph": {
+        "nodes": [
+          {"id": "playbook.web-discovery", "type": "playbook", "label": "Web Discovery"},
+          {"id": "tech.ffuf", "type": "tool", "label": "ffuf"},
+          {"id": "tech.nikto", "type": "tool", "label": "nikto"},
+          {"id": "concept.endpoint-model", "type": "concept", "label": "endpoint model"}
+        ],
+        "edges": [
+          {"source": "playbook.web-discovery", "target": "tech.ffuf", "predicate": "uses"},
+          {"source": "playbook.web-discovery", "target": "tech.nikto", "predicate": "uses"},
+          {"source": "playbook.web-discovery", "target": "concept.endpoint-model", "predicate": "feeds"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "playbook.credential",
+      "source_ref": "builtin/playbooks/credential",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["host", "web_test", "verifier"],
+      "content": "凭据验证打法：只在授权范围与密码策略下做低烈度尝试；hydra 用于服务登录，wpscan 用户枚举，impacket 系列用于 AD 会话验证。TTP 映射：T1110 Brute Force、T1078 Valid Accounts。证据要求：目标、用户字典/来源、尝试次数、成功响应、后续访问能力。成功凭据进入 SecretRef，绝不进入普通事件与模型上下文。",
+      "graph": {
+        "nodes": [
+          {"id": "playbook.credential", "type": "playbook", "label": "Credential Validation"},
+          {"id": "tt1110", "type": "attck", "label": "T1110 Brute Force"},
+          {"id": "tech.hydra", "type": "tool", "label": "hydra"},
+          {"id": "tech.impacket", "type": "tool", "label": "impacket"}
+        ],
+        "edges": [
+          {"source": "playbook.credential", "target": "tt1110", "predicate": "implements"},
+          {"source": "playbook.credential", "target": "tech.hydra", "predicate": "uses"},
+          {"source": "playbook.credential", "target": "tech.impacket", "predicate": "uses"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "playbook.exploitation",
+      "source_ref": "builtin/playbooks/exploitation",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_test", "host", "verifier"],
+      "content": "漏洞利用打法：先用结构化扫描器（nuclei/sqlmap/zap/burp）产出 candidate，再用 replays 与 Oracle 验证，最后才考虑 metasploit 等利用工具；exploit 只在授权靶场执行并走 S2+ 沙箱。TTP 映射：T1213 Data from Information Repositories、T1190 Exploit Public-Facing Application。证据要求：candidate -> verified 的完整链：请求、响应、证据引用、影响说明。",
+      "graph": {
+        "nodes": [
+          {"id": "playbook.exploitation", "type": "playbook", "label": "Exploitation"},
+          {"id": "tt1190", "type": "attck", "label": "T1190 Exploit Public-Facing Application"},
+          {"id": "tech.nuclei", "type": "tool", "label": "nuclei"},
+          {"id": "tech.metasploit", "type": "tool", "label": "metasploit"}
+        ],
+        "edges": [
+          {"source": "playbook.exploitation", "target": "tt1190", "predicate": "implements"},
+          {"source": "playbook.exploitation", "target": "tech.nuclei", "predicate": "candidates_from"},
+          {"source": "playbook.exploitation", "target": "tech.metasploit", "predicate": "optional_use"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "playbook.evidence",
+      "source_ref": "builtin/playbooks/evidence",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["verifier", "web_test", "host"],
+      "content": "证据与验证打法：verified finding 必须同时具备原始 Artifact、ReplayProof 或可重放命令、Oracle 结论、影响描述；negative evidence 也要记录（测了什么、为什么未继续）。复测从原 ReplayProof 创建 retest Run，原证据不可变。缺失任一证据时 Oracle 返回 inconclusive，不允许降级为 verified。",
+      "graph": {
+        "nodes": [
+          {"id": "playbook.evidence", "type": "playbook", "label": "Evidence & Verification"},
+          {"id": "concept.replay-proof", "type": "concept", "label": "ReplayProof"},
+          {"id": "concept.negative-evidence", "type": "concept", "label": "negative evidence"}
+        ],
+        "edges": [
+          {"source": "playbook.evidence", "target": "concept.replay-proof", "predicate": "requires"},
+          {"source": "playbook.evidence", "target": "concept.negative-evidence", "predicate": "records"}
+        ]
+      }
+    }
+  ]
+}

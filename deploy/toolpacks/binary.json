@@ -1,0 +1,280 @@
+{
+  "name": "binary",
+  "version": "0.1.0",
+  "image": "veridix-tools:full",
+  "digest": "sha256:bf67b075a85eb095689c5bacfe0bbd3d5819e0075abd243685c782fc4c4263ec",
+  "license": "MIT",
+  "capabilities": [
+    "file.identify",
+    "string.extract",
+    "disassembly",
+    "headers",
+    "debug",
+    "firmware.extract"
+  ],
+  "runner_requirements": [
+    "container"
+  ],
+  "network": "none",
+  "files": {
+    "read": [
+      "/workspace/input"
+    ],
+    "write": [
+      "/workspace/output"
+    ]
+  },
+  "risk_defaults": {
+    "binary.file.identify": "L1",
+    "binary.strings": "L1",
+    "binary.disasm.objdump": "L1",
+    "binary.headers.readelf": "L1",
+    "binary.debug.gdb": "L2",
+    "binary.extract.binwalk": "L1"
+  },
+  "tools": [
+    "binary.file.identify",
+    "binary.strings",
+    "binary.disasm.objdump",
+    "binary.headers.readelf",
+    "binary.debug.gdb",
+    "binary.extract.binwalk"
+  ],
+  "healthcheck": [
+    "sh",
+    "-c",
+    "command -v file && command -v strings && command -v objdump && command -v readelf && command -v gdb && command -v binwalk"
+  ],
+  "tool_definitions": [
+    {
+      "ref": "binary.file.identify",
+      "name": "binary.file.identify",
+      "description": "Identify a binary file type",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 30,
+      "command_template": [
+        "file",
+        "{path}"
+      ],
+      "examples": [
+        "file sample.bin"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "file_not_found"
+      ]
+    },
+    {
+      "ref": "binary.strings",
+      "name": "binary.strings",
+      "description": "Extract printable strings from a binary",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "min": {
+            "type": "string",
+            "default": "6"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120,
+      "command_template": [
+        "strings",
+        "-n",
+        "{min}",
+        "{path}"
+      ],
+      "examples": [
+        "strings -n 6 sample.bin"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "file_not_found"
+      ]
+    },
+    {
+      "ref": "binary.disasm.objdump",
+      "name": "binary.disasm.objdump",
+      "description": "Disassemble a binary with objdump",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 300,
+      "command_template": [
+        "objdump",
+        "-d",
+        "{path}"
+      ],
+      "examples": [
+        "objdump -d sample.elf"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "disasm_failed"
+      ]
+    },
+    {
+      "ref": "binary.headers.readelf",
+      "name": "binary.headers.readelf",
+      "description": "Dump ELF headers with readelf",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "option": {
+            "type": "string",
+            "default": "-h"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "readelf",
+        "{option}",
+        "{path}"
+      ],
+      "examples": [
+        "readelf -h sample.elf"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "file_not_found"
+      ]
+    },
+    {
+      "ref": "binary.debug.gdb",
+      "name": "binary.debug.gdb",
+      "description": "Run batch gdb inspection on a binary",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string",
+            "default": "info functions"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 300,
+      "command_template": [
+        "gdb",
+        "-batch",
+        "-ex",
+        "{command}",
+        "{path}"
+      ],
+      "examples": [
+        "gdb -batch -ex 'info functions' sample"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "gdb_failed"
+      ]
+    },
+    {
+      "ref": "binary.extract.binwalk",
+      "name": "binary.extract.binwalk",
+      "description": "Extract embedded files from a binary with binwalk",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "output": {
+            "type": "string",
+            "default": "/workspace/output"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 600,
+      "command_template": [
+        "binwalk",
+        "-e",
+        "-C",
+        "{output}",
+        "{path}"
+      ],
+      "examples": [
+        "binwalk -e -C /workspace/output firmware.bin"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "extract_failed"
+      ]
+    }
+  ]
+}

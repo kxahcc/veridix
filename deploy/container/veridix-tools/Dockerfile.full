@@ -1,0 +1,35 @@
+ARG BASE_IMAGE=veridix-tools:dev
+FROM ${BASE_IMAGE}
+
+COPY deploy/container/veridix-tools/downloads/metasploit.deb /tmp/metasploit.deb
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        arp-scan \
+        awscli \
+        binutils \
+        binwalk \
+        build-essential \
+        dirb \
+        dirsearch \
+        dnsrecon \
+        gdb \
+        krb5-user \
+        libjson-perl \
+        onesixtyone \
+        python3-impacket \
+        python3-ldapdomaindump \
+        ruby-dev \
+        samba-common-bin \
+        snmp \
+        xxd \
+    && dpkg -i /tmp/metasploit.deb || apt-get -f install -y \
+    && rm -f /tmp/metasploit.deb \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN gem install wpscan --no-document
+
+COPY deploy/container/veridix-tools/wrappers/ /usr/local/bin/
+RUN chmod +x /usr/local/bin/* || true
+
+CMD ["sh", "-c", "echo veridix-tools-full ready; command -v nmap; command -v msfconsole; command -v wpscan"]

@@ -1,0 +1,4 @@
+#!/bin/sh
+export HOME=/workspace
+mkdir -p "$HOME/.dirsearch"
+exec /usr/bin/python3 /usr/lib/python3/dist-packages/dirsearch/dirsearch.py "$@"

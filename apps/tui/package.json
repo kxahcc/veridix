@@ -1,0 +1,23 @@
+{
+  "name": "@veridix/tui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "veridix-tui": "dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.tsx",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@veridix/sdk-typescript": "0.1.0",
+    "ink": "^7.1.1",
+    "node-pty": "^1.1.0",
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "ink-testing-library": "^4.0.0"
+  }
+}

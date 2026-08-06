@@ -1,0 +1,115 @@
+{
+  "name": "code",
+  "version": "0.2.0",
+  "enabled": true,
+  "image": "veridix-tools:code-lite",
+  "digest": "sha256:ea651e62ce0bd2eb91378f5f87b0f61c835cb62ac47a37578891858fa6c2bb04",
+  "license": "MIT",
+  "capabilities": [
+    "sast",
+    "secret.scan"
+  ],
+  "runner_requirements": [
+    "container"
+  ],
+  "network": "none",
+  "files": {
+    "read": [
+      "/workspace/input"
+    ],
+    "write": [
+      "/workspace/output"
+    ]
+  },
+  "risk_defaults": {
+    "code.sast.semgrep": "L1",
+    "code.secrets.detect": "L1"
+  },
+  "tools": [
+    "code.sast.semgrep",
+    "code.secrets.detect"
+  ],
+  "healthcheck": [
+    "sh",
+    "-c",
+    "command -v semgrep && command -v detect-secrets && test -f /opt/veridix-rules/semgrep/security.yml"
+  ],
+  "tool_definitions": [
+    {
+      "ref": "code.sast.semgrep",
+      "name": "code.sast.semgrep",
+      "description": "Run offline semgrep static analysis over a mounted source directory; use /workspace/input for the workspace root",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "default": "/workspace/input"
+          }
+        },
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 600,
+      "output_parser": "semgrep_json",
+      "command_template": [
+        "semgrep",
+        "scan",
+        "--config",
+        "/opt/veridix-rules/semgrep",
+        "--project-root",
+        "{path}",
+        "--disable-version-check",
+        "--metrics=off",
+        "--json",
+        "{path}"
+      ],
+      "examples": [
+        "semgrep scan --config /opt/veridix-rules/semgrep --project-root /workspace/input/benchmarks/fixtures/code_scan --disable-version-check --metrics=off --json /workspace/input/benchmarks/fixtures/code_scan"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "sast_failed"
+      ]
+    },
+    {
+      "ref": "code.secrets.detect",
+      "name": "code.secrets.detect",
+      "description": "Scan a mounted source tree for hardcoded secrets; use /workspace/input for the workspace root",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "default": "/workspace/input"
+          }
+        },
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 300,
+      "output_parser": "detect_secrets_json",
+      "command_template": [
+        "detect-secrets",
+        "scan",
+        "--all-files",
+        "{path}"
+      ],
+      "examples": [
+        "detect-secrets scan --all-files /workspace/input"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "secret_scan_failed"
+      ]
+    }
+  ]
+}

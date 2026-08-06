@@ -1,0 +1,138 @@
+{
+  "name": "cloud",
+  "version": "0.1.0",
+  "image": "veridix-tools:full",
+  "digest": "sha256:bf67b075a85eb095689c5bacfe0bbd3d5819e0075abd243685c782fc4c4263ec",
+  "license": "MIT",
+  "capabilities": [
+    "cloud.identity",
+    "cloud.storage",
+    "cloud.compute"
+  ],
+  "runner_requirements": [
+    "container"
+  ],
+  "network": "egress_proxy",
+  "files": {
+    "read": [
+      "/workspace/input"
+    ],
+    "write": [
+      "/workspace/output"
+    ]
+  },
+  "risk_defaults": {
+    "cloud.aws.sts": "L1",
+    "cloud.aws.s3.list": "L2",
+    "cloud.aws.ec2.describe": "L2"
+  },
+  "tools": [
+    "cloud.aws.sts",
+    "cloud.aws.s3.list",
+    "cloud.aws.ec2.describe"
+  ],
+  "healthcheck": [
+    "sh",
+    "-c",
+    "command -v aws"
+  ],
+  "tool_definitions": [
+    {
+      "ref": "cloud.aws.sts",
+      "name": "cloud.aws.sts",
+      "description": "Resolve the current AWS identity",
+      "schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "aws",
+        "sts",
+        "get-caller-identity"
+      ],
+      "examples": [
+        "aws sts get-caller-identity"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "aws_failed"
+      ]
+    },
+    {
+      "ref": "cloud.aws.s3.list",
+      "name": "cloud.aws.s3.list",
+      "description": "List objects in an S3 bucket",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "bucket"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120,
+      "command_template": [
+        "aws",
+        "s3",
+        "ls",
+        "s3://{bucket}/{prefix}"
+      ],
+      "examples": [
+        "aws s3 ls s3://example-bucket/"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "aws_failed"
+      ]
+    },
+    {
+      "ref": "cloud.aws.ec2.describe",
+      "name": "cloud.aws.ec2.describe",
+      "description": "Describe EC2 instances in the configured account",
+      "schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120,
+      "command_template": [
+        "aws",
+        "ec2",
+        "describe-instances",
+        "--output",
+        "json"
+      ],
+      "examples": [
+        "aws ec2 describe-instances --output json"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "aws_failed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "cn.glossary.recon",
+      "source_ref": "builtin/cn/glossary-recon",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["host", "network", "web_discovery"],
+      "content": "信息收集：资产发现、子域名枚举、端口扫描、服务识别、指纹识别、旁站查询。工具：subfinder、nmap、httpx、whatweb、fscan。对应 ATT&CK：T1595 Active Scanning、T1592 Gather Victim Host Information。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.glossary.recon", "type": "glossary", "label": "Recon Glossary"},
+          {"id": "tech.nmap", "type": "tool", "label": "nmap"},
+          {"id": "tech.subfinder", "type": "tool", "label": "subfinder"}
+        ],
+        "edges": [
+          {"source": "cn.glossary.recon", "target": "tech.nmap", "predicate": "mentions"},
+          {"source": "cn.glossary.recon", "target": "tech.subfinder", "predicate": "mentions"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "cn.glossary.web",
+      "source_ref": "builtin/cn/glossary-web",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["web_test"],
+      "content": "Web 漏洞中文术语：SQL 注入、跨站脚本 XSS、跨站请求伪造 CSRF、服务端请求伪造 SSRF、文件上传、文件包含、反序列化、命令注入、路径遍历、越权访问、逻辑漏洞、子域接管、JWT 攻击、开放重定向。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.glossary.web", "type": "glossary", "label": "Web Vuln Glossary"},
+          {"id": "vuln.sqli", "type": "vuln_class", "label": "SQL Injection"},
+          {"id": "vuln.xss", "type": "vuln_class", "label": "XSS"}
+        ],
+        "edges": [
+          {"source": "cn.glossary.web", "target": "vuln.sqli", "predicate": "defines"},
+          {"source": "cn.glossary.web", "target": "vuln.xss", "predicate": "defines"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "cn.glossary.attck",
+      "source_ref": "builtin/cn/glossary-attck",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["host", "ad", "verifier"],
+      "content": "ATT&CK 战术中文速查：侦察 Reconnaissance、资源开发 Resource Development、初始访问 Initial Access、执行 Execution、持久化 Persistence、提权 Privilege Escalation、防御规避 Defense Evasion、凭据访问 Credential Access、发现 Discovery、横向移动 Lateral Movement、收集 Collection、命令与控制 Command and Control、影响 Impact。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.glossary.attck", "type": "glossary", "label": "ATT&CK Tactics"},
+          {"id": "tt1190", "type": "attck", "label": "Initial Access"},
+          {"id": "tt1021", "type": "attck", "label": "Lateral Movement"}
+        ],
+        "edges": [
+          {"source": "cn.glossary.attck", "target": "tt1190", "predicate": "translates"},
+          {"source": "cn.glossary.attck", "target": "tt1021", "predicate": "translates"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "cn.glossary.tools",
+      "source_ref": "builtin/cn/glossary-tools",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["host", "web_test", "network"],
+      "content": "安全工具中文对照：nmap 端口扫描、masscan 高速扫描、nuclei 模板扫描、fscan 内网综合扫描、sqlmap SQL 注入、nikto Web 扫描、wpscan WordPress 扫描、gobuster/ffuf 目录爆破、hydra 口令爆破、metasploit 漏洞利用框架、burp 代理、impacket 协议工具。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.glossary.tools", "type": "glossary", "label": "Tool Glossary"},
+          {"id": "tech.nuclei", "type": "tool", "label": "nuclei"},
+          {"id": "tech.sqlmap", "type": "tool", "label": "sqlmap"},
+          {"id": "tech.metasploit", "type": "tool", "label": "metasploit"}
+        ],
+        "edges": [
+          {"source": "cn.glossary.tools", "target": "tech.nuclei", "predicate": "mentions"},
+          {"source": "cn.glossary.tools", "target": "tech.sqlmap", "predicate": "mentions"},
+          {"source": "cn.glossary.tools", "target": "tech.metasploit", "predicate": "mentions"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "cn.glossary.ports",
+      "source_ref": "builtin/cn/glossary-ports",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["host", "network"],
+      "content": "常见端口服务：21 FTP、22 SSH、23 Telnet、25 SMTP、53 DNS、80/443 HTTP(S)、135/139/445 SMB、3306 MySQL、3389 RDP、5432 PostgreSQL、6379 Redis、8080 代理、9200 Elasticsearch、27017 MongoDB。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.glossary.ports", "type": "glossary", "label": "Port Glossary"},
+          {"id": "tt1046", "type": "attck", "label": "Network Service Discovery"}
+        ],
+        "edges": [
+          {"source": "cn.glossary.ports", "target": "tt1046", "predicate": "supports"}
+        ]
+      }
+    },
+    {
+      "chunk_id": "cn.glossary.report",
+      "source_ref": "builtin/cn/glossary-report",
+      "version": "1",
+      "trust": "project_trusted",
+      "subjects": ["verifier", "report"],
+      "content": "报告术语：严重级别、CVSS 评分、漏洞类别、复现步骤、证据、修复建议、影响范围、风险等级、已确认/候选/重复。证据需包含请求响应与可复现命令。",
+      "graph": {
+        "nodes": [
+          {"id": "cn.glossary.report", "type": "glossary", "label": "Report Glossary"},
+          {"id": "concept.cvss", "type": "concept", "label": "CVSS"},
+          {"id": "concept.replay-proof", "type": "concept", "label": "ReplayProof"}
+        ],
+        "edges": [
+          {"source": "cn.glossary.report", "target": "concept.cvss", "predicate": "mentions"},
+          {"source": "cn.glossary.report", "target": "concept.replay-proof", "predicate": "mentions"}
+        ]
+      }
+    }
+  ]
+}

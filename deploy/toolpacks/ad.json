@@ -1,0 +1,360 @@
+{
+  "name": "ad",
+  "version": "0.2.0",
+  "image": "veridix-tools:full",
+  "digest": "sha256:bf67b075a85eb095689c5bacfe0bbd3d5819e0075abd243685c782fc4c4263ec",
+  "license": "MIT",
+  "capabilities": [
+    "ldap.search",
+    "smb.enumerate",
+    "kerberos.auth",
+    "domain.scan",
+    "domain.dump",
+    "credential.dump",
+    "kerberos.roast"
+  ],
+  "runner_requirements": [
+    "container"
+  ],
+  "network": "egress_proxy",
+  "files": {
+    "read": [
+      "/workspace/input"
+    ],
+    "write": [
+      "/workspace/output"
+    ]
+  },
+  "risk_defaults": {
+    "ad.ldap.search": "L2",
+    "ad.smb.enumerate": "L2",
+    "ad.kerberos.init": "L3",
+    "ad.nmap.smb": "L3",
+    "ad.ldap.domaindump": "L3",
+    "ad.impacket.secretsdump": "L4",
+    "ad.impacket.getnpusers": "L3",
+    "ad.impacket.psexec": "L4"
+  },
+  "tools": [
+    "ad.ldap.search",
+    "ad.smb.enumerate",
+    "ad.kerberos.init",
+    "ad.nmap.smb",
+    "ad.ldap.domaindump",
+    "ad.impacket.secretsdump",
+    "ad.impacket.getnpusers",
+    "ad.impacket.psexec"
+  ],
+  "healthcheck": [
+    "sh",
+    "-c",
+    "command -v ldapsearch && command -v smbclient && command -v kinit && command -v nmap && command -v ldapdomaindump && /usr/bin/python3 -c 'import impacket'"
+  ],
+  "tool_definitions": [
+    {
+      "ref": "ad.ldap.search",
+      "name": "ad.ldap.search",
+      "description": "Search an LDAP directory tree",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "base_dn": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "base_dn"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "ldapsearch",
+        "-x",
+        "-H",
+        "ldap://{host}",
+        "-b",
+        "{base_dn}",
+        "{query}"
+      ],
+      "examples": [
+        "ldapsearch -x -H ldap://dc -b dc=example,dc=com '(objectClass=user)'"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "ldap_failed"
+      ]
+    },
+    {
+      "ref": "ad.smb.enumerate",
+      "name": "ad.smb.enumerate",
+      "description": "Enumerate SMB shares and domain info",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "smbclient",
+        "-L",
+        "//{host}",
+        "-N"
+      ],
+      "examples": [
+        "smbclient -L //dc -N"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "smb_failed"
+      ]
+    },
+    {
+      "ref": "ad.kerberos.init",
+      "name": "ad.kerberos.init",
+      "description": "Initialize a Kerberos ticket for a principal",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "principal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "principal"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 60,
+      "command_template": [
+        "kinit",
+        "{principal}"
+      ],
+      "examples": [
+        "kinit user@EXAMPLE.COM"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "kerberos_failed"
+      ]
+    },
+    {
+      "ref": "ad.nmap.smb",
+      "name": "ad.nmap.smb",
+      "description": "Run nmap SMB enumeration scripts",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 180,
+      "command_template": [
+        "nmap",
+        "-p",
+        "445,139",
+        "{host}",
+        "--script",
+        "smb-enum-shares"
+      ],
+      "examples": [
+        "nmap -p 445,139 dc --script smb-enum-shares"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "ad.ldap.domaindump",
+      "name": "ad.ldap.domaindump",
+      "description": "Dump Active Directory domain structure with ldapdomaindump",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 300,
+      "command_template": [
+        "ldapdomaindump",
+        "{host}"
+      ],
+      "examples": [
+        "ldapdomaindump dc.example.com"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "dump_failed"
+      ]
+    },
+    {
+      "ref": "ad.impacket.secretsdump",
+      "name": "ad.impacket.secretsdump",
+      "description": "Dump credentials with impacket secretsdump",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L4",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 600,
+      "command_template": [
+        "/usr/bin/python3",
+        "/usr/lib/python3/dist-packages/impacket/examples/secretsdump.py",
+        "{target}"
+      ],
+      "examples": [
+        "secretsdump.py 'domain/user:password@dc'"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "dump_failed"
+      ]
+    },
+    {
+      "ref": "ad.impacket.getnpusers",
+      "name": "ad.impacket.getnpusers",
+      "description": "Enumerate Kerberos pre-auth disabled accounts with GetNPUsers",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "dc_ip": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain",
+          "dc_ip"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 300,
+      "command_template": [
+        "/usr/bin/python3",
+        "/usr/lib/python3/dist-packages/impacket/examples/GetNPUsers.py",
+        "{domain}/",
+        "-no-pass",
+        "-dc-ip",
+        "{dc_ip}"
+      ],
+      "examples": [
+        "GetNPUsers.py domain/ -no-pass -dc-ip 10.0.0.1"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "kerberos_failed"
+      ]
+    },
+    {
+      "ref": "ad.impacket.psexec",
+      "name": "ad.impacket.psexec",
+      "description": "Execute a command on a remote host with impacket psexec",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string",
+            "default": "whoami"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L4",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 600,
+      "command_template": [
+        "/usr/bin/python3",
+        "/usr/lib/python3/dist-packages/impacket/examples/psexec.py",
+        "{target}",
+        "{command}"
+      ],
+      "examples": [
+        "psexec.py 'domain/user:password@host' whoami"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "exec_failed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@veridix/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "veridix": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run --pool=forks --poolOptions.forks.singleFork"
+  },
+  "dependencies": {
+    "@veridix/config": "0.1.0",
+    "@veridix/contracts": "0.1.0",
+    "@veridix/sdk-typescript": "0.1.0",
+    "commander": "^12.1.0"
+  }
+}

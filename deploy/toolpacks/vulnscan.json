@@ -1,0 +1,164 @@
+{
+  "name": "vulnscan",
+  "version": "0.1.0",
+  "image": "veridix-tools:full",
+  "digest": "sha256:bf67b075a85eb095689c5bacfe0bbd3d5819e0075abd243685c782fc4c4263ec",
+  "license": "MIT",
+  "capabilities": [
+    "vuln.scan",
+    "network.enumerate",
+    "exploit.framework"
+  ],
+  "runner_requirements": [
+    "container"
+  ],
+  "network": "egress_proxy",
+  "files": {
+    "read": [
+      "/workspace/input"
+    ],
+    "write": [
+      "/workspace/output"
+    ]
+  },
+  "risk_defaults": {
+    "nuclei.scan": "L3",
+    "fscan.scan": "L3",
+    "metasploit.console": "L4"
+  },
+  "tools": [
+    "nuclei.scan",
+    "fscan.scan",
+    "metasploit.console"
+  ],
+  "healthcheck": [
+    "sh",
+    "-c",
+    "command -v nuclei && command -v fscan && command -v msfconsole"
+  ],
+  "tool_definitions": [
+    {
+      "ref": "nuclei.scan",
+      "name": "nuclei.scan",
+      "description": "Run a nuclei template scan against a target",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Full target URL or host"
+          },
+          "templates": {
+            "type": "string",
+            "default": "/root/nuclei-templates/http/exposures",
+            "description": "Nuclei template directory or file glob (exposure-focused by default for speed)"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 600,
+      "output_parser": "nuclei_jsonl",
+      "command_template": [
+        "nuclei-sandbox",
+        "-u",
+        "{target}",
+        "-t",
+        "{templates}",
+        "-jsonl"
+      ],
+      "examples": [
+        "nuclei -u https://target -t cves/ -jsonl"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "fscan.scan",
+      "name": "fscan.scan",
+      "description": "Run fscan host and service enumeration",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "ports": {
+            "type": "string",
+            "default": "1-65535"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L3",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 600,
+      "output_parser": "fscan_text",
+      "command_template": [
+        "fscan-sandbox",
+        "-h",
+        "{target}",
+        "-p",
+        "{ports}"
+      ],
+      "examples": [
+        "fscan -h 10.0.0.0/24 -p 1-65535"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "scan_failed"
+      ]
+    },
+    {
+      "ref": "metasploit.console",
+      "name": "metasploit.console",
+      "description": "Run a Metasploit console command in the sandbox",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "module"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L4",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 600,
+      "command_template": [
+        "msfconsole",
+        "-q",
+        "-x",
+        "use {module}; run"
+      ],
+      "examples": [
+        "msfconsole -q -x 'use auxiliary/scanner/http/title; run'"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "module_missing"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+.env*.local
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Local runtime and build output
+runtime/
+dist-product/
+artifacts/
+logs/
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,3 @@
+# Optional remote/platform extras for Veridix.
+paramiko>=4.0,<6
+pywinpty>=3.0,<4

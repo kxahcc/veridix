@@ -1,0 +1,17 @@
+#!/bin/sh
+set -u
+
+export HOME=/workspace
+export TMPDIR=/workspace
+mkdir -p "$HOME/.wpscan" "$TMPDIR" /workspace/output /workspace/wpscan-cache
+if [ -d /root/.wpscan ]; then
+  cp -rn /root/.wpscan/. "$HOME/.wpscan/"
+fi
+
+output="/workspace/output/wpscan.json"
+wpscan --format json --output "$output" --cache-dir /workspace/wpscan-cache "$@"
+exit_code=$?
+if [ -f "$output" ]; then
+  cat "$output"
+fi
+exit $exit_code

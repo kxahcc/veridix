@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://veridix.local/schemas/veridix-config.schema.json",
+  "title": "VeridixConfig",
+  "type": "object",
+  "required": ["version", "project", "profile"],
+  "properties": {
+    "version": { "const": 1 },
+    "project": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "profile": {
+      "type": "string",
+      "enum": ["desktop", "lab", "server", "airgap"]
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "dir": { "type": "string", "minLength": 1 }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "properties": {
+        "inference": { "$ref": "inference-profile.schema.json" },
+        "embedding": { "$ref": "inference-profile.schema.json" },
+        "rerank": { "$ref": "inference-profile.schema.json" }
+      },
+      "additionalProperties": true
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "targetScope": {
+          "type": "object",
+          "properties": {
+            "allowed": { "type": "array", "items": { "type": "string" } },
+            "excluded": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "sandbox": {
+          "type": "object",
+          "properties": {
+            "maxMemoryMb": { "type": "integer", "minimum": 64 },
+            "maxCpus": { "type": "number", "minimum": 0.25 },
+            "network": { "enum": ["none", "proxy", "direct"] }
+          }
+        },
+        "dataPolicy": {
+          "type": "object",
+          "properties": {
+            "allowedLabels": {
+              "type": "array",
+              "items": { "enum": ["public", "project", "sensitive", "secret"] }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

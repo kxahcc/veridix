@@ -1,0 +1,326 @@
+{
+  "name": "host",
+  "version": "0.1.0",
+  "image": "veridix-tools:full",
+  "digest": "sha256:bf67b075a85eb095689c5bacfe0bbd3d5819e0075abd243685c782fc4c4263ec",
+  "license": "MIT",
+  "capabilities": [
+    "service.verify",
+    "credential.check",
+    "smb.enumerate",
+    "ssh.probe",
+    "whois.lookup",
+    "smb.map",
+    "share.enumerate",
+    "snmp.community"
+  ],
+  "runner_requirements": [
+    "container"
+  ],
+  "network": "egress_proxy",
+  "files": {
+    "read": [
+      "/workspace/input"
+    ],
+    "write": [
+      "/workspace/output"
+    ]
+  },
+  "risk_defaults": {
+    "host.smb.lookup": "L2",
+    "host.ssh.probe": "L2",
+    "host.auth.hydra": "L4",
+    "host.whois.lookup": "L1",
+    "host.smbmap.share": "L2",
+    "host.enum4linux.share": "L2",
+    "host.snmp.community": "L2"
+  },
+  "tools": [
+    "host.smb.lookup",
+    "host.ssh.probe",
+    "host.auth.hydra",
+    "host.whois.lookup",
+    "host.smbmap.share",
+    "host.enum4linux.share",
+    "host.snmp.community"
+  ],
+  "healthcheck": [
+    "sh",
+    "-c",
+    "command -v smbclient && command -v ssh && command -v hydra && command -v whois && command -v smbmap && command -v enum4linux && command -v onesixtyone"
+  ],
+  "tool_definitions": [
+    {
+      "ref": "host.smb.lookup",
+      "name": "host.smb.lookup",
+      "description": "List SMB shares anonymously on a host",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "smbclient",
+        "-L",
+        "//{host}",
+        "-N"
+      ],
+      "examples": [
+        "smbclient -L //10.0.0.1 -N"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "smb_failed"
+      ]
+    },
+    {
+      "ref": "host.ssh.probe",
+      "name": "host.ssh.probe",
+      "description": "Probe SSH banner and authentication behavior",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        "{user}@{host}"
+      ],
+      "examples": [
+        "ssh -o BatchMode=yes root@10.0.0.1"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "ssh_failed"
+      ]
+    },
+    {
+      "ref": "host.auth.hydra",
+      "name": "host.auth.hydra",
+      "description": "Run a hydra credential check against a service",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "protocol": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "users": {
+            "type": "string"
+          },
+          "passwords": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "protocol",
+          "host",
+          "users",
+          "passwords"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L4",
+      "runner": "container",
+      "sandbox_profile": "S3",
+      "timeout_seconds": 600,
+      "output_parser": "hydra_text",
+      "command_template": [
+        "hydra",
+        "-L",
+        "{users}",
+        "-P",
+        "{passwords}",
+        "{protocol}://{host}"
+      ],
+      "examples": [
+        "hydra -L users.txt -P pass.txt ssh://10.0.0.1"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "credential_check_failed"
+      ]
+    },
+    {
+      "ref": "host.whois.lookup",
+      "name": "host.whois.lookup",
+      "description": "Look up registration information for a domain",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L1",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 60,
+      "command_template": [
+        "whois",
+        "{domain}"
+      ],
+      "examples": [
+        "whois example.com"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "whois_failed"
+      ]
+    },
+    {
+      "ref": "host.smbmap.share",
+      "name": "host.smbmap.share",
+      "description": "Enumerate SMB shares and permissions with smbmap",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120,
+      "command_template": [
+        "smbmap",
+        "-H",
+        "{host}"
+      ],
+      "examples": [
+        "smbmap -H 10.0.0.1"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "smb_failed"
+      ]
+    },
+    {
+      "ref": "host.enum4linux.share",
+      "name": "host.enum4linux.share",
+      "description": "Run full SMB and NetBIOS enumeration with enum4linux",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 300,
+      "command_template": [
+        "enum4linux",
+        "-a",
+        "{host}"
+      ],
+      "examples": [
+        "enum4linux -a 10.0.0.1"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "enum_failed"
+      ]
+    },
+    {
+      "ref": "host.snmp.community",
+      "name": "host.snmp.community",
+      "description": "Probe SNMP community strings with onesixtyone",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "community": {
+            "type": "string",
+            "default": "public"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "risk_level": "L2",
+      "runner": "container",
+      "sandbox_profile": "S2",
+      "timeout_seconds": 120,
+      "command_template": [
+        "onesixtyone",
+        "{target}",
+        "{community}"
+      ],
+      "examples": [
+        "onesixtyone 10.0.0.1 public"
+      ],
+      "failure_codes": [
+        "timeout",
+        "denied",
+        "tool_unavailable",
+        "snmp_failed"
+      ]
+    }
+  ]
+}
