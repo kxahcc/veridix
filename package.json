@@ -18,6 +18,8 @@
   "scripts": {
     "up": "python scripts/env_up.py",
     "down": "python scripts/dev_stack.py --stop",
+    "cli": "node apps/cli/dist/index.js",
+    "tui": "node apps/tui/dist/index.js",
     "build": "npm run build -w @veridix/contracts && npm run build -w @veridix/config && npm run build -w @veridix/sdk-typescript && npm run build -w @veridix/cli && npm run build -w @veridix/web && npm run build -w @veridix/tui",
     "test": "npm run build && npm run test -w @veridix/cli && npm run test -w @veridix/config && npm run test -w @veridix/contracts && npm run test -w @veridix/sdk-typescript && npm run test -w @veridix/web && npm run test -w @veridix/tui",
     "typecheck": "tsc -b"

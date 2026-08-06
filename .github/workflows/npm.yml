@@ -26,6 +26,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.VERIDIX_NPM }}
         run: |
-          npm publish -w @veridix/contracts --access public
-          npm publish -w @veridix/config --access public
-          npm publish -w @veridix/sdk-typescript --access public
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "VERIDIX_NPM secret is empty; configure it under repository settings."
+            exit 1
+          fi
+          npm config set "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN"
+          npm publish -w @veridix/contracts --access public --registry https://registry.npmjs.org
+          npm publish -w @veridix/config --access public --registry https://registry.npmjs.org
+          npm publish -w @veridix/sdk-typescript --access public --registry https://registry.npmjs.org

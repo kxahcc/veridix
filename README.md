@@ -23,29 +23,9 @@ Veridix 是一个面向授权安全测试与漏洞验证的 AI Agent 平台。�
 - Docker Desktop 或 Docker Engine
 - 一个 OpenAI-compatible 或 LiteLLM 兼容的模型端点
 
-### 推荐安装
+### 安装完整产品
 
-npm 包发布后，直接安装 CLI：
-
-```bash
-npm install -g @veridix/cli
-veridix doctor
-veridix up
-```
-
-`veridix up` 会：
-
-1. 从 GHCR 拉取并启动 pgvector、Qdrant、Chroma、Neo4j 和 `veridix-tools` 工具环境；
-2. 启动 Control Plane、Agent Worker 和 Web；
-3. 等待全部健康检查通过。
-
-启动后访问：
-
-- Web: <http://127.0.0.1:5173>
-- Control Plane API: <http://127.0.0.1:8787>
-- Lab Provider: <http://127.0.0.1:8766>
-
-### 源码运行
+当前版本通过源码仓库和 Docker 镜像交付。安装后启动完整产品：
 
 ```bash
 git clone git@github.com:kxahcc/veridix.git
@@ -55,13 +35,26 @@ npm run build
 npm run up
 ```
 
+`npm run up` 会：
+
+1. 拉取并启动 pgvector、Qdrant、Chroma、Neo4j 和 `veridix-tools` 工具环境；
+2. 启动 Control Plane、Agent Worker 和 Web；
+3. 等待全部健康检查通过。
+
 停止：
 
 ```bash
-veridix down
+npm run down
 ```
 
-源码运行同样会通过 Docker Compose 管理存储和工具环境，不需要用户手动逐个拉镜像。
+启动后访问：
+
+- Web: <http://127.0.0.1:5173>
+- Control Plane API: <http://127.0.0.1:8787>
+- Lab Provider: <http://127.0.0.1:8766>
+
+CLI 使用 `npm run cli -- <命令>` 调用，TUI 使用 `npm run tui` 启动。
+存储和工具环境由 Docker Compose 统一管理，不需要手动逐个拉镜像。
 
 ## Docker 镜像
 
@@ -72,12 +65,11 @@ ghcr.io/kxahcc/veridix/veridix-tools:full
 ghcr.io/kxahcc/veridix/veridix-tools:code-lite
 ```
 
-仓库在 `v*` 标签或手动触发时，会通过 GitHub Actions 构建并推送这些镜像。
-存储后端继续使用 pgvector、Qdrant、Chroma、Neo4j 官方镜像，由 Compose 自动拉取。
+存储后端使用 pgvector、Qdrant、Chroma、Neo4j 官方镜像，由 Compose 自动拉取。
 
-## npm 包
+## npm SDK 包
 
-首次 `v*` 发布时，GitHub Actions 会发布：
+SDK 包供外部工程集成使用：
 
 ```text
 @veridix/contracts
@@ -85,8 +77,9 @@ ghcr.io/kxahcc/veridix/veridix-tools:code-lite
 @veridix/sdk-typescript
 ```
 
-`@veridix/cli` 和 `@veridix/tui` 会在运行时 bundle 方案落地后启用，
-确保用户 `npm install -g @veridix/cli` 后可以完整运行。
+```bash
+npm install @veridix/contracts @veridix/config @veridix/sdk-typescript
+```
 
 ## 三端入口
 
@@ -97,8 +90,7 @@ ghcr.io/kxahcc/veridix/veridix-tools:code-lite
 ### TUI
 
 ```bash
-npm install -g @veridix/tui
-veridix-tui
+npm run tui
 ```
 
 进入后使用 `/help` 查看斜杠命令，例如：
@@ -115,17 +107,17 @@ veridix-tui
 ### CLI
 
 ```bash
-veridix provider register deepseek \
+npm run cli -- provider register deepseek \
   --endpoint https://api.deepseek.com/v1 \
   --model deepseek-v4-flash \
   --api-key-ref env:DEEPSEEK_API_KEY
 
-veridix project lab
-veridix target <project-id> --url https://target.example
-veridix mission <project-id> web
-veridix run start <mission-id>
-veridix run attach <run-id>
-veridix report <run-id> --format bundle --out .
+npm run cli -- project lab
+npm run cli -- target <project-id> --url https://target.example
+npm run cli -- mission <project-id> web
+npm run cli -- run start <mission-id>
+npm run cli -- run attach <run-id>
+npm run cli -- report <run-id> --format bundle --out .
 ```
 
 ## 系统概览

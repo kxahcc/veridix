@@ -1,2 +1,4 @@
 *
 !.gitignore
+!nuclei-templates/
+!nuclei-templates/.gitkeep

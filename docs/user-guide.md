@@ -27,28 +27,23 @@
 
 ## 3. 安装
 
-### 3.1 推荐安装（npm 包）
+### 3.1 完整产品安装
 
-正式发布后，用户不需要克隆仓库：
-
-```bash
-npm install -g @veridix/cli
-veridix doctor
-veridix up
-```
-
-TUI 可单独安装：
+当前版本通过源码仓库安装。克隆后构建并启动完整产品：
 
 ```bash
-npm install -g @veridix/tui
-veridix-tui
+git clone git@github.com:kxahcc/veridix.git
+cd veridix
+npm ci
+npm run build
+npm run up
 ```
 
-`veridix up` 会自动执行 Docker Compose，拉取存储和工具镜像，并启动 Control Plane、Agent Worker 和 Web。用户不需要手动逐个 `docker pull`。
+`npm run up` 会自动执行 Docker Compose，拉取存储和工具镜像，并启动 Control Plane、Agent Worker 和 Web。用户不需要手动逐个 `docker pull`。
 
-### 3.2 源码安装
+启动后，CLI 使用 `npm run cli -- <命令>` 调用，TUI 使用 `npm run tui` 启动。
 
-开发或审计源码时使用：
+### 3.2 环境准备
 
 仓库根目录提供了 [.env.example](../.env.example) 作为环境变量参考。绝大多数配置都有默认值，可以完全不设置环境变量，直接使用 Web `诊断与设置` 或 TUI 斜杠命令配置供应商、MCP、技能和检索存储。
 
@@ -106,16 +101,7 @@ python scripts/tool_env_up.py
 
 ### 3.6 npm 管理
 
-正式发布后，用户路径以全局 CLI 为主：
-
-```bash
-npm install -g @veridix/cli
-veridix doctor
-veridix up
-veridix down
-```
-
-源码开发路径仍使用 workspace：
+源码仓库使用 npm workspace 管理：
 
 ```bash
 # 安装全部 workspace 依赖
@@ -136,6 +122,13 @@ npm run dev -w @veridix/tui
 npm run dev -w @veridix/cli
 ```
 
+构建后可使用：
+
+```bash
+npm run cli -- doctor
+npm run tui
+```
+
 当 npm 网络受限时，可以切换国内镜像：
 
 ```bash
@@ -146,7 +139,7 @@ npm config set registry https://registry.npmmirror.com
 
 系统使用 Docker 管理四类资源：存储后端、安全工具镜像、ZAP DAST 和测试靶场。
 
-`veridix up` 默认从 GitHub Container Registry 拉取工具镜像：
+`npm run up` 默认从 GitHub Container Registry 拉取工具镜像：
 
 ```text
 ghcr.io/kxahcc/veridix/veridix-tools:full
@@ -189,7 +182,7 @@ docker pull docker.m.daocloud.io/pgvector/pgvector:pg16
 docker tag docker.m.daocloud.io/pgvector/pgvector:pg16 pgvector/pgvector:pg16
 ```
 
-`veridix up` / `npm run up` 会先自动执行 Docker Compose，再启动主机进程。正式发布后，工具镜像会发布到 GHCR，Compose 默认从镜像仓库拉取；离线环境仍可使用 `scripts/tool_env_bundle.py` 分发镜像 tar 包。
+`npm run up` 会先自动执行 Docker Compose，再启动主机进程。工具镜像默认从 GHCR 拉取；离线环境仍可使用 `scripts/tool_env_bundle.py` 分发镜像 tar 包。
 
 ## 4. 配置模型供应商
 
@@ -219,12 +212,12 @@ $env:DEEPSEEK_API_KEY="sk-..."
 ### 4.3 CLI 配置
 
 ```bash
-veridix provider register deepseek \
+npm run cli -- provider register deepseek \
   --endpoint https://api.deepseek.com/v1 \
   --model deepseek-v4-flash \
   --api-key-ref env:DEEPSEEK_API_KEY
 
-veridix provider default deepseek \
+npm run cli -- provider default deepseek \
   --endpoint https://api.deepseek.com/v1 \
   --model deepseek-v4-flash \
   --api-key-ref env:DEEPSEEK_API_KEY
@@ -287,23 +280,17 @@ VERIDIX_CONTROL_ROLE=admin
 ### 5.2 CLI 流程
 
 ```bash
-veridix project lab
-veridix target <project-id> --url https://target.example
-veridix mission <project-id> web --template scanner_verify
-veridix run start <mission-id>
-veridix run attach <run-id>
+npm run cli -- project lab
+npm run cli -- target <project-id> --url https://target.example
+npm run cli -- mission <project-id> web --template scanner_verify
+npm run cli -- run start <mission-id>
+npm run cli -- run attach <run-id>
 ```
 
 ### 5.3 TUI 流程
 
 ```bash
-veridix-tui
-```
-
-源码开发时：
-
-```bash
-npm run dev -w @veridix/tui
+npm run tui
 ```
 
 常用快捷键：
@@ -338,9 +325,9 @@ Web/TUI/CLI 可以：
 CLI：
 
 ```bash
-veridix skills
-veridix skills-register my-skill --name "My Skill" --trigger web_test
-veridix skills-delete my-skill
+npm run cli -- skills
+npm run cli -- skills-register my-skill --name "My Skill" --trigger web_test
+npm run cli -- skills-delete my-skill
 ```
 
 ### 6.2 MCP
@@ -355,9 +342,9 @@ veridix skills-delete my-skill
 CLI：
 
 ```bash
-veridix mcp list
-veridix mcp register my-server --name "My Server" --kind local --command "python -m my_mcp"
-veridix mcp test my-server
+npm run cli -- mcp list
+npm run cli -- mcp register my-server --name "My Server" --kind local --command "python -m my_mcp"
+npm run cli -- mcp test my-server
 ```
 
 ### 6.3 知识库
@@ -374,9 +361,9 @@ veridix mcp test my-server
 CLI：
 
 ```bash
-veridix knowledge list
-veridix knowledge add --chunk-id c1 --source-ref docs/x --content "hello"
-veridix knowledge delete c1
+npm run cli -- knowledge list
+npm run cli -- knowledge add --chunk-id c1 --source-ref docs/x --content "hello"
+npm run cli -- knowledge delete c1
 ```
 
 ### 6.4 项目记忆
@@ -384,21 +371,21 @@ veridix knowledge delete c1
 CLI：
 
 ```bash
-veridix memory list
-veridix memory record --subject host --predicate port --value 8080
-veridix memory fix --fact-id <id> --value corrected
-veridix memory forget --fact-id <id>
-veridix memory clear
+npm run cli -- memory list
+npm run cli -- memory record --subject host --predicate port --value 8080
+npm run cli -- memory fix --fact-id <id> --value corrected
+npm run cli -- memory forget --fact-id <id>
+npm run cli -- memory clear
 ```
 
 ### 6.5 资产与漏洞
 
 ```bash
-veridix assets list --project-id project_x
-veridix assets add --project-id project_x --value https://target.example --kind url
-veridix assets update asset_y --status verified
-veridix vulns list --project-id project_x --severity high
-veridix risk --project-id project_x
+npm run cli -- assets list --project-id project_x
+npm run cli -- assets add --project-id project_x --value https://target.example --kind url
+npm run cli -- assets update asset_y --status verified
+npm run cli -- vulns list --project-id project_x --severity high
+npm run cli -- risk --project-id project_x
 ```
 
 ## 7. 真实工具链
@@ -476,9 +463,9 @@ VERIDIX_RERANK_ENABLED=1
 CLI：
 
 ```bash
-veridix report run_abc --format markdown --out reports/
-veridix report run_abc --format html --out reports/
-veridix report run_abc --format bundle --out reports/
+npm run cli -- report run_abc --format markdown --out reports/
+npm run cli -- report run_abc --format html --out reports/
+npm run cli -- report run_abc --format bundle --out reports/
 ```
 
 Web：
@@ -492,9 +479,9 @@ Web：
 ### 10.1 CLI
 
 ```bash
-veridix doctor
-veridix self-test
-veridix health
+npm run cli -- doctor
+npm run cli -- self-test
+npm run cli -- health
 ```
 
 ### 10.2 一键验收
@@ -525,7 +512,7 @@ python scripts/release_gate.py --dry-run
 - 检查 `api_key_ref` 是否指向已设置的环境变量；
 - 检查模型名与 endpoint；
 - 只支持 chat 的供应商会在 capability 中显示 `embeddings: false`，这是正常状态；
-- 使用 `veridix provider <endpoint> <model> --api-key-ref env:NAME --json` 查看详细能力。
+- 使用 `npm run cli -- provider <endpoint> <model> --api-key-ref env:NAME --json` 查看详细能力。
 
 ### 攻击图空白
 
