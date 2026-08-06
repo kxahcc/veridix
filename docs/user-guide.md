@@ -27,7 +27,28 @@
 
 ## 3. 安装
 
-### 3.1 源码安装
+### 3.1 推荐安装（npm 包）
+
+正式发布后，用户不需要克隆仓库：
+
+```bash
+npm install -g @veridix/cli
+veridix doctor
+veridix up
+```
+
+TUI 可单独安装：
+
+```bash
+npm install -g @veridix/tui
+veridix-tui
+```
+
+`veridix up` 会自动执行 Docker Compose，拉取存储和工具镜像，并启动 Control Plane、Agent Worker 和 Web。用户不需要手动逐个 `docker pull`。
+
+### 3.2 源码安装
+
+开发或审计源码时使用：
 
 仓库根目录提供了 [.env.example](../.env.example) 作为环境变量参考。绝大多数配置都有默认值，可以完全不设置环境变量，直接使用 Web `诊断与设置` 或 TUI 斜杠命令配置供应商、MCP、技能和检索存储。
 
@@ -43,7 +64,7 @@ npm ci
 .\.venv\Scripts\python.exe -m pip install -r services/requirements.txt
 ```
 
-### 3.2 一键启动
+### 3.3 一键启动
 
 ```bash
 npm run up
@@ -68,14 +89,14 @@ python scripts/env_up.py
 npm run down
 ```
 
-### 3.3 只启动基础服务
+### 3.4 只启动基础服务
 
 ```bash
 python scripts/dev_stack.py
 python scripts/dev_stack.py --stop
 ```
 
-### 3.4 工具环境检查
+### 3.5 工具环境检查
 
 ```bash
 python scripts/tool_env_up.py
@@ -83,9 +104,18 @@ python scripts/tool_env_up.py
 
 该脚本会验证容器内 `nmap / nuclei / masscan / sqlmap / subfinder / httpx / naabu / msfconsole / wpscan` 等工具可用。
 
-### 3.5 npm 管理
+### 3.6 npm 管理
 
-当前版本仍以源码仓库方式运行，因此 npm 承担依赖安装、构建和启动 Web/TUI/CLI 的角色。
+正式发布后，用户路径以全局 CLI 为主：
+
+```bash
+npm install -g @veridix/cli
+veridix doctor
+veridix up
+veridix down
+```
+
+源码开发路径仍使用 workspace：
 
 ```bash
 # 安装全部 workspace 依赖
@@ -112,7 +142,7 @@ npm run dev -w @veridix/cli
 npm config set registry https://registry.npmmirror.com
 ```
 
-### 3.6 Docker 管理
+### 3.7 Docker 管理
 
 系统使用 Docker 管理四类资源：存储后端、安全工具镜像、ZAP DAST 和测试靶场。
 
@@ -152,7 +182,7 @@ docker pull docker.m.daocloud.io/pgvector/pgvector:pg16
 docker tag docker.m.daocloud.io/pgvector/pgvector:pg16 pgvector/pgvector:pg16
 ```
 
-`npm run up` 会先自动执行 Docker Compose，再启动主机进程；`npm run down` 只停止主机进程，Docker 容器需要单独用 Compose down 清理。当前阶段 npm 与 Docker 是开发/部署工具，等正式发布后，会把这部分收敛为统一安装器或启动器，用户不再需要直接面对这些命令。
+`veridix up` / `npm run up` 会先自动执行 Docker Compose，再启动主机进程。正式发布后，工具镜像会发布到 GHCR，Compose 默认从镜像仓库拉取；离线环境仍可使用 `scripts/tool_env_bundle.py` 分发镜像 tar 包。
 
 ## 4. 配置模型供应商
 
@@ -258,6 +288,12 @@ veridix run attach <run-id>
 ```
 
 ### 5.3 TUI 流程
+
+```bash
+veridix-tui
+```
+
+源码开发时：
 
 ```bash
 npm run dev -w @veridix/tui
