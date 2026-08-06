@@ -29,7 +29,7 @@
 
 ### 3.1 完整产品安装
 
-当前版本通过源码仓库安装。克隆后构建并启动完整产品：
+Veridix 通过 GitHub 仓库安装。克隆后构建并启动完整产品：
 
 ```bash
 git clone git@github.com:kxahcc/veridix.git
@@ -84,14 +84,7 @@ python scripts/env_up.py
 npm run down
 ```
 
-### 3.4 只启动基础服务
-
-```bash
-python scripts/dev_stack.py
-python scripts/dev_stack.py --stop
-```
-
-### 3.5 工具环境检查
+### 3.4 工具环境检查
 
 ```bash
 python scripts/tool_env_up.py
@@ -99,35 +92,25 @@ python scripts/tool_env_up.py
 
 该脚本会验证容器内 `nmap / nuclei / masscan / sqlmap / subfinder / httpx / naabu / msfconsole / wpscan` 等工具可用。
 
-### 3.6 npm 管理
+### 3.5 运行与入口
 
-源码仓库使用 npm workspace 管理：
+日常安装、构建和运行使用：
 
 ```bash
-# 安装全部 workspace 依赖
+# 安装依赖
 npm ci
 
-# 构建全部前端与 SDK
+# 构建产品
 npm run build
 
-# 启动完整开发栈（存储 + 工具环境 + Control Plane + Worker + Web）
+# 启动完整产品（存储 + 工具环境 + Control Plane + Worker + Web）
 npm run up
 
-# 停止开发栈
+# 停止产品
 npm run down
-
-# 单独启动某个入口
-npm run dev -w @veridix/web
-npm run dev -w @veridix/tui
-npm run dev -w @veridix/cli
 ```
 
-构建后可使用：
-
-```bash
-npm run cli -- doctor
-npm run tui
-```
+启动后，Web 在 `http://127.0.0.1:5173` 使用，CLI 通过 `npm run cli -- <命令>` 调用，TUI 通过 `npm run tui` 启动。
 
 当 npm 网络受限时，可以切换国内镜像：
 
@@ -135,7 +118,7 @@ npm run tui
 npm config set registry https://registry.npmmirror.com
 ```
 
-### 3.7 Docker 管理
+### 3.6 Docker 管理
 
 系统使用 Docker 管理四类资源：存储后端、安全工具镜像、ZAP DAST 和测试靶场。
 
@@ -390,12 +373,12 @@ npm run cli -- risk --project-id project_x
 
 ## 7. 真实工具链
 
-默认开发栈使用 `fake` runner，适合演示与流程验证。真实扫描需要：
+默认安装使用 `fake` runner，适合演示与流程验证。真实扫描需要：
 
 ```bash
 export VERIDIX_RUNNER=docker
 export VERIDIX_TOOL_NETWORK=veridix-system_veridix-net
-python scripts/dev_stack.py
+npm run up
 ```
 
 Windows：
@@ -403,7 +386,7 @@ Windows：
 ```powershell
 $env:VERIDIX_RUNNER="docker"
 $env:VERIDIX_TOOL_NETWORK="veridix-system_veridix-net"
-python scripts/dev_stack.py
+npm run up
 ```
 
 支持的工具包：

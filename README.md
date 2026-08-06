@@ -25,7 +25,7 @@ Veridix 是一个面向授权安全测试与漏洞验证的 AI Agent 平台。�
 
 ### 安装完整产品
 
-当前版本通过源码仓库和 Docker 镜像交付。安装后启动完整产品：
+Veridix 通过 GitHub 仓库安装，运行环境由 Docker Compose 自动提供。安装后启动完整产品：
 
 ```bash
 git clone git@github.com:kxahcc/veridix.git
@@ -66,20 +66,6 @@ ghcr.io/kxahcc/veridix/veridix-tools:code-lite
 ```
 
 存储后端使用 pgvector、Qdrant、Chroma、Neo4j 官方镜像，由 Compose 自动拉取。
-
-## 发布形态
-
-当前 v0.1.0 的发布形态如下：
-
-- GitHub 源码仓库：包含 Web、TUI、CLI、Agent 后端和全部内置知识/技能；
-- GHCR 工具镜像：`veridix-tools:full`、`veridix-tools:code-lite`；
-
-CLI、TUI、Web 和 SDK 当前都随源码仓库交付，不单独发布为 npm 包。源码仓库内使用 npm workspace：
-
-```bash
-npm ci
-npm run build
-```
 
 ## 三端入口
 
