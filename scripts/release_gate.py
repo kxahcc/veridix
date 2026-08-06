@@ -117,7 +117,64 @@ def main() -> int:
             f"{datetime.now(timezone.utc).strftime('%Y-%m-%d')}.json"
         ),
     )
+    parser.add_argument("--version", default="0.1.0")
+    parser.add_argument("--build-artifacts", action="store_true")
+    parser.add_argument("--artifacts-key", default="")
+    parser.add_argument("--artifacts-dry-run", action="store_true")
+    parser.add_argument("--verify-artifacts", action="store_true")
+    parser.add_argument("--artifacts-public-key", default="")
     args = parser.parse_args()
+
+    artifact_stages: list[dict] = []
+    if args.build_artifacts:
+        artifact_command = [
+            PYTHON,
+            "scripts/build_release_artifacts.py",
+            "--out",
+            ".tmp/release-artifacts",
+            "--version",
+            args.version,
+        ]
+        if args.artifacts_dry_run:
+            artifact_command.append("--dry-run")
+        else:
+            if not args.artifacts_key:
+                raise SystemExit(
+                    "--artifacts-key is required unless --artifacts-dry-run"
+                )
+            artifact_command += ["--key", args.artifacts_key]
+        artifact_stages.append(
+            {
+                "name": "artifacts",
+                "command": artifact_command,
+                "timeout": 1800,
+                "required": False,
+            }
+        )
+    if args.verify_artifacts:
+        if not args.artifacts_public_key:
+            raise SystemExit(
+                "--artifacts-public-key is required with --verify-artifacts"
+            )
+        artifact_stages.append(
+            {
+                "name": "artifact-verify",
+                "command": [
+                    PYTHON,
+                    "scripts/verify_release_artifacts.py",
+                    "--airgap",
+                    ".tmp/release-artifacts/veridix-airgap.zip",
+                    "--public-key",
+                    args.artifacts_public_key,
+                    "--out",
+                    ".tmp/release-verify",
+                ],
+                "timeout": 1800,
+                "required": False,
+            }
+        )
+    if args.reuse and artifact_stages:
+        raise SystemExit("--reuse cannot be combined with artifact flags")
 
     if args.reuse:
         rows: list[dict] = []
@@ -267,7 +324,7 @@ def main() -> int:
                             "command": " ".join(stage["command"]),
                             "timeout_seconds": stage["timeout"],
                         }
-                        for stage in stages
+                        for stage in artifact_stages + stages
                     ]
                 },
                 ensure_ascii=False,
@@ -278,7 +335,7 @@ def main() -> int:
 
     rows: list[dict] = []
     failed: list[str] = []
-    for stage in stages:
+    for stage in artifact_stages + stages:
         print(f"release gate {stage['name']}", flush=True)
         run = _run(stage["command"], timeout=stage["timeout"])
         ok = run["exit_code"] == 0
