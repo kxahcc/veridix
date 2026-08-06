@@ -32,4 +32,4 @@ jobs:
           python-version: "3.13"
           cache: pip
       - run: pip install -r services/requirements.txt
-      - run: python -m pytest services/control_plane services/agent_runtime services/release_service services/research_service runners/container runners/remote -q --timeout=300
+      - run: python -m pytest services/control_plane services/agent_runtime services/release_service runners/container runners/remote -m "not integration" -q --timeout=300

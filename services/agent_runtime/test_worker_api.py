@@ -144,7 +144,17 @@ def test_worker_runner_factory_docker_fails_closed() -> None:
         )
 
 
-def test_worker_runner_factory_docker_wires_browser_and_shell() -> None:
+def test_worker_runner_factory_docker_wires_browser_and_shell(
+    monkeypatch,
+) -> None:
+    from services.tool_pack.registry import ToolRegistry
+
+    monkeypatch.setattr(
+        ToolRegistry,
+        "verify_local_image_digests",
+        lambda self: [],
+    )
+
     class StubBackend:
         pass
 

@@ -1,0 +1,5 @@
+{
+  "name": "airgap",
+  "label": "Offline or intranet",
+  "dependencies": ["node", "python", "docker"]
+}

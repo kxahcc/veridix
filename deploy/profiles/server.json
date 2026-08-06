@@ -1,0 +1,5 @@
+{
+  "name": "server",
+  "label": "Team server",
+  "dependencies": ["node", "python", "postgres", "object-store"]
+}

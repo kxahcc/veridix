@@ -1,0 +1,5 @@
+{
+  "name": "lab",
+  "label": "CTF, lab, and benchmark",
+  "dependencies": ["node", "python", "docker", "postgres", "object-store"]
+}

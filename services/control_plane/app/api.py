@@ -2782,6 +2782,15 @@ def acceptance_summary() -> dict:
         except Exception:
             return {}
 
+    external_fixture = load("preset-external-fixture-2026-08-05.json")
+    if not external_fixture:
+        external_fixture = {"real_environment": "pending"}
+    preset_fixtures = load("preset-fixtures-2026-08-05.json")
+    if not preset_fixtures:
+        preset_fixtures = {
+            "preset_count": len(LOOP_PRESET_REGISTRY.list())
+        }
+
     return {
         "gates": load("real-provider-gates-2026-08-04.json"),
         "lab_gates": load("real-mission-gates-2026-08-03.json"),
@@ -2804,10 +2813,8 @@ def acceptance_summary() -> dict:
                     "profile-preset-host-recon-real-2026-08-05.json"
                 ),
             },
-            "external_fixture": load(
-                "preset-external-fixture-2026-08-05.json"
-            ),
-            "preset_fixtures": load("preset-fixtures-2026-08-05.json"),
+            "external_fixture": external_fixture,
+            "preset_fixtures": preset_fixtures,
             "preset_count": len(LOOP_PRESET_REGISTRY.list()),
         },
     }

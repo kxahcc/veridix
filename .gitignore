@@ -19,6 +19,8 @@ logs/
 *.db
 *.db-wal
 *.db-shm
+tests/.pytest_tmp/*
+!tests/.pytest_tmp/.gitkeep
 
 # OS and editor
 .DS_Store

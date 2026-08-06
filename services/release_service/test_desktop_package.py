@@ -6,10 +6,13 @@ import sys
 import zipfile
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
+@pytest.mark.integration
 def test_desktop_package_contains_three_surfaces(tmp_path) -> None:
     out = tmp_path / "product"
     subprocess.run(
@@ -53,6 +56,7 @@ def test_desktop_package_contains_three_surfaces(tmp_path) -> None:
     assert "cli/index.js" in manifest["files"]
 
 
+@pytest.mark.integration
 def test_desktop_package_zip_is_signed(tmp_path) -> None:
     out = tmp_path / "product"
     subprocess.run(

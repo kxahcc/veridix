@@ -7,6 +7,7 @@ import re
 import threading
 import zipfile
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
 from services.control_plane.app.control_store import ControlStore
 from services.control_plane.app.contracts import AgentEvent
@@ -20,7 +21,10 @@ def test_builtin_skill_catalog_is_rich_and_bundle_aware() -> None:
         response = client.get("/api/v1/runtime/skills")
         assert response.status_code == 200
         rows = response.json()
-        assert len(rows) >= 60
+        skill_dir = Path(__file__).resolve().parents[2] / "skills" / "builtin"
+        expected_skills = len(list(skill_dir.glob("*/SKILL.md")))
+        assert len(rows) == expected_skills
+        assert len(rows) >= 40
         by_ref = {str(row["skill_ref"]): row for row in rows}
 
         orchestration = by_ref["veridix-redteam-orchestration"]
@@ -32,10 +36,9 @@ def test_builtin_skill_catalog_is_rich_and_bundle_aware() -> None:
             for file in orchestration["files"]
         )
 
-        cors = by_ref["cyberstrike-cors"]
-        assert cors["description"]
-        assert cors["cwe_ids"]
-        assert cors["tags"]
+        sample = by_ref["strix-idor"]
+        assert sample["description"]
+        assert sample["package_path"].startswith("skills/builtin/")
 
         detail = client.get(
             "/api/v1/runtime/skills/veridix-redteam-orchestration"

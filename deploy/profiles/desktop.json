@@ -1,0 +1,5 @@
+{
+  "name": "desktop",
+  "label": "Desktop personal use",
+  "dependencies": ["node", "python", "docker", "browser", "mitmproxy"]
+}
